@@ -15,13 +15,13 @@ locals {
   # Level 1: folders whose parent is an L0 folder
   folders_l1 = {
     for k, v in local.folders : k => v
-    if v.parent_type == "folder" && contains(keys(local.folders_l0), try(v.parent_key, ""))
+    if v.parent_type == "folder" && contains(keys(local.folders_l0), v.parent_key != null ? v.parent_key : "")
   }
 
   # Level 2: folders whose parent is an L1 folder
   folders_l2 = {
     for k, v in local.folders : k => v
-    if v.parent_type == "folder" && contains(keys(local.folders_l1), try(v.parent_key, ""))
+    if v.parent_type == "folder" && contains(keys(local.folders_l1), v.parent_key != null ? v.parent_key : "")
   }
 
   # Flattened list of project + service combinations using config values

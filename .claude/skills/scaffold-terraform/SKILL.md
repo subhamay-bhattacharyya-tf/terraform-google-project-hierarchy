@@ -296,6 +296,41 @@ Example hierarchy configuration:
 
 ---
 
+## README
+
+Generate a `README.md` with the following structure:
+
+### Title
+
+Use a descriptive title that reflects what the module does — **not** the repository name. Format:
+
+```text
+# Terraform Module for <short description of what it manages>
+```
+
+Example:
+
+```text
+# Terraform Module for GCP Folder and Project Hierarchy Management
+```
+
+### Badges
+
+Add the following badge line immediately after the title, replacing `<repo-name>` with the actual repository name and `<cloud-badge>` with the appropriate cloud provider badge:
+
+```markdown
+![Release](https://github.com/subhamay-bhattacharyya-tf/<repo-name>/actions/workflows/ci.yaml/badge.svg)&nbsp;![GCP](https://img.shields.io/badge/GCP-4285F4?logo=googlecloud&logoColor=white)&nbsp;![Commit Activity](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![File Count](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![Top Language](https://img.shields.io/github/languages/top/subhamay-bhattacharyya-tf/<repo-name>)&nbsp;![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/d38e95a090be70513f16e3b1a3529d76/raw/<repo-name>.json?)&nbsp;![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-623CE4?logo=anthropic&logoColor=white)
+```
+
+The cloud badge should match the provider:
+
+| Provider | Badge markdown |
+| --- | --- |
+| GCP | `![GCP](https://img.shields.io/badge/GCP-4285F4?logo=googlecloud&logoColor=white)` |
+| AWS | `![AWS](https://img.shields.io/badge/AWS-232F3E?logo=amazonaws&logoColor=white)` |
+
+---
+
 ## After Generation
 
 After scaffolding the infrastructure files:
