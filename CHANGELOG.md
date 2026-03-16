@@ -8,8 +8,13 @@
 - Update README structure, enhance CI workflow, and improve local folder logic
 - Use try function to safely resolve monitoring project ID
 
+### 🐛 Bug Fixes
+
+- Update notification channel and alert policy conditions to use monitoring_project_key
+
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
