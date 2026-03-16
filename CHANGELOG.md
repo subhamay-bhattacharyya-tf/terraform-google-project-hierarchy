@@ -13,6 +13,7 @@
 ### 🐛 Bug Fixes
 
 - Update notification channel and alert policy conditions to use monitoring_project_key
+- Add deletion_protection to folder resources for consistency
 
 ### 🚜 Refactor
 
@@ -20,6 +21,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
