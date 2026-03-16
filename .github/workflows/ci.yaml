@@ -11,6 +11,7 @@ on:
       - '*.tf'
       - 'examples/**'
       - 'test/**'
+      - '.github/workflows/ci.yaml'
   pull_request:
     branches: [main]
     paths:
@@ -109,8 +110,8 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Setup gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
@@ -133,8 +134,8 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
         working-directory: test
         env:
-          GCP_ORGANIZATION_ID: ${{ secrets.GCP_ORGANIZATION_ID }}
-          GCP_BILLING_ACCOUNT_ID: ${{ secrets.GCP_BILLING_ACCOUNT_ID }}
+          GCP_ORGANIZATION_ID: ${{ vars.GCP_ORGANIZATION_ID }}
+          GCP_BILLING_ACCOUNT_ID: ${{ vars.GCP_BILLING_ACCOUNT_ID }}
 
   # ============================================================================
   # Generate Change Log
