@@ -8,6 +8,7 @@
 - Update README structure, enhance CI workflow, and improve local folder logic
 - Use try function to safely resolve monitoring project ID
 - Add deletion_policy to projects and update hierarchy configuration for unique project IDs
+- Enhance hierarchy configuration to include test_suffix for folder display names
 
 ### 🐛 Bug Fixes
 
@@ -19,6 +20,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
