@@ -31,7 +31,8 @@
         "team": "platform",
         "managed-by": "terraform"
       },
-      "enable_alerts": true
+      "enable_alerts": true,
+      "deletion_policy": "DELETE"
     },
     "data-warehouse": {
       "name": "Data Warehouse",
@@ -48,7 +49,8 @@
         "team": "data",
         "managed-by": "terraform"
       },
-      "enable_alerts": false
+      "enable_alerts": false,
+      "deletion_policy": "DELETE"
     }
   },
   "monitoring_project_key": "github-cicd"

@@ -11,6 +11,20 @@
 #   terraform apply -var organization_id=<YOUR_ORG_ID>
 # ============================================================================
 
+locals {
+  base_config = jsondecode(file("${path.module}/hierarchy.json"))
+
+  # When test_suffix is provided, append it to project IDs to avoid
+  # GCP 409 conflicts across test runs. Project IDs are globally unique
+  # and may linger if a prior run failed cleanup.
+  hierarchy_config = var.test_suffix == "" ? local.base_config : merge(local.base_config, {
+    projects = {
+      for k, v in local.base_config.projects :
+      k => merge(v, { project_id = "${v.project_id}-${var.test_suffix}" })
+    }
+  })
+}
+
 module "gcp_project_hierarchy" {
   source = "../../"
 
@@ -25,7 +39,7 @@ module "gcp_project_hierarchy" {
     service_usage   = 100.0
   }
 
-  hierarchy_config = jsondecode(file("${path.module}/hierarchy.json"))
+  hierarchy_config = local.hierarchy_config
 }
 
 # ============================================================================
@@ -45,6 +59,12 @@ variable "billing_account" {
 
 variable "notification_email" {
   description = "Email address for monitoring alert notifications."
+  type        = string
+  default     = ""
+}
+
+variable "test_suffix" {
+  description = "Optional short suffix appended to project IDs during testing to ensure uniqueness across runs. Max 4 characters."
   type        = string
   default     = ""
 }

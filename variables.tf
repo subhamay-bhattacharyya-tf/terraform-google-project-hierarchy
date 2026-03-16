@@ -81,13 +81,14 @@ variable "hierarchy_config" {
       parent_key   = optional(string)
     })), {})
     projects = optional(map(object({
-      name            = string
-      project_id      = string
-      folder_key      = string
-      billing_account = optional(string)
-      services        = optional(list(string), [])
-      labels          = optional(map(string), {})
-      enable_alerts   = optional(bool, false)
+      name              = string
+      project_id        = string
+      folder_key        = string
+      billing_account   = optional(string)
+      services          = optional(list(string), [])
+      labels            = optional(map(string), {})
+      enable_alerts     = optional(bool, false)
+      deletion_policy   = optional(string, "PREVENT")
     })), {})
     monitoring_project_key = optional(string)
   })

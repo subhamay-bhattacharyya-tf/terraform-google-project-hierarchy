@@ -2,6 +2,7 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -15,11 +16,16 @@ func TestGoogleProjectHierarchy(t *testing.T) {
 	organizationID := mustEnv(t, "GCP_ORGANIZATION_ID")
 	billingAccount := mustEnvOptional("GCP_BILLING_ACCOUNT_ID")
 
+	// Unique suffix prevents 409 conflicts when a previous run left projects
+	// behind (e.g. due to a failed destroy). GCP project IDs are globally unique.
+	suffix := randomProjectSuffix()
+
 	terraformOptions := &terraform.Options{
 		TerraformDir: "../examples/basic",
 		Vars: map[string]interface{}{
 			"organization_id": organizationID,
 			"billing_account": billingAccount,
+			"test_suffix":     suffix,
 		},
 		NoColor: true,
 	}
@@ -43,10 +49,10 @@ func TestGoogleProjectHierarchy(t *testing.T) {
 	assertOutputKeyPresent(t, projectIDs, "github-cicd", "project")
 	assertOutputKeyPresent(t, projectIDs, "data-warehouse", "project")
 
-	// Validate project IDs match expected values
-	assert.Equal(t, "prj-shared-github-cicd", projectIDs["github-cicd"],
+	// Validate project IDs match expected values (base ID + run-specific suffix)
+	assert.Equal(t, fmt.Sprintf("prj-shared-github-cicd-%s", suffix), projectIDs["github-cicd"],
 		"github-cicd project ID mismatch")
-	assert.Equal(t, "prj-shared-data-warehouse", projectIDs["data-warehouse"],
+	assert.Equal(t, fmt.Sprintf("prj-shared-data-warehouse-%s", suffix), projectIDs["data-warehouse"],
 		"data-warehouse project ID mismatch")
 
 	// Validate project numbers are populated

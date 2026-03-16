@@ -25,10 +25,12 @@ func mustEnvOptional(key string) string {
 	return strings.TrimSpace(os.Getenv(key))
 }
 
-// randomProjectSuffix generates a short random suffix for unique project IDs.
+// randomProjectSuffix generates a 4-character random suffix for unique project IDs.
+// Length is capped at 4 to stay within GCP's 30-character project ID limit when
+// appended (with a dash) to the longest base ID used in tests.
 func randomProjectSuffix() string {
 	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, 6)
+	b := make([]byte, 4)
 	for i := range b {
 		b[i] = chars[rand.Intn(len(chars))]
 	}
