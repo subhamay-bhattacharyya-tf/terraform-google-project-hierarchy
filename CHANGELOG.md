@@ -28,3 +28,8 @@
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
+- Update CHANGELOG.md [skip ci]
+
+### ⚙️ Miscellaneous Tasks
+
+- Remove outdated S3 bucket example configurations and documentation
