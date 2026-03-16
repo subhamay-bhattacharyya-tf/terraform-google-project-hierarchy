@@ -6,7 +6,7 @@ locals {
   # Resolve the monitoring project ID from the config key, if specified
   monitoring_project_id = (
     local.monitoring_project_key != null
-    ? google_project.this[local.monitoring_project_key].project_id
+    ? try(google_project.this[local.monitoring_project_key].project_id, null)
     : null
   )
 
