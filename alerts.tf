@@ -10,9 +10,11 @@ locals {
     : null
   )
 
-  # Create notification channel only when both email and monitoring project are set
+  # Create notification channel only when both email and monitoring project key are set.
+  # Uses monitoring_project_key (known at plan time) rather than monitoring_project_id
+  # (a resource attribute) so that count is resolvable during the plan phase.
   create_notification_channel = (
-    var.notification_email != "" && local.monitoring_project_id != null
+    var.notification_email != "" && local.monitoring_project_key != null
   )
 }
 
@@ -33,7 +35,7 @@ resource "google_monitoring_notification_channel" "email" {
 
 # Alert policy: CPU utilization threshold
 resource "google_monitoring_alert_policy" "cpu_utilization" {
-  count = local.monitoring_project_id != null ? 1 : 0
+  count = local.monitoring_project_key != null ? 1 : 0
 
   project      = local.monitoring_project_id
   display_name = "High CPU Utilization"
@@ -73,7 +75,7 @@ resource "google_monitoring_alert_policy" "cpu_utilization" {
 
 # Alert policy: error log rate threshold
 resource "google_monitoring_alert_policy" "error_rate" {
-  count = local.monitoring_project_id != null ? 1 : 0
+  count = local.monitoring_project_key != null ? 1 : 0
 
   project      = local.monitoring_project_id
   display_name = "High Error Rate"
@@ -114,7 +116,7 @@ resource "google_monitoring_alert_policy" "error_rate" {
 
 # Alert policy: API service request rate threshold
 resource "google_monitoring_alert_policy" "service_usage" {
-  count = local.monitoring_project_id != null ? 1 : 0
+  count = local.monitoring_project_key != null ? 1 : 0
 
   project      = local.monitoring_project_id
   display_name = "High Service API Request Rate"
