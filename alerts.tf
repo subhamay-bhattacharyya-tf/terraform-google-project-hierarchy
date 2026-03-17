@@ -1,48 +1,55 @@
 # ============================================================================
 # terraform-google-project-hierarchy - Monitoring and Alerting
 # ============================================================================
+#
+# One notification channel and three alert policies are created per project
+# that has enable_alerts = true. Each project manages its own monitoring
+# resources independently.
+#
+# Notification email priority (per project):
+#   1. projects[key].notification_email  (per-project override in hierarchy_config)
+#   2. var.notification_email            (module-level default)
+#   3. No channel created               (if both are unset or empty)
+# ============================================================================
 
 locals {
-  # Resolve the monitoring project ID from the config key, if specified
-  monitoring_project_id = (
-    local.monitoring_project_key != null
-    ? try(google_project.this[local.monitoring_project_key].project_id, null)
-    : null
-  )
-
-  # Create notification channel only when both email and monitoring project key are set.
-  # Uses monitoring_project_key (known at plan time) rather than monitoring_project_id
-  # (a resource attribute) so that count is resolvable during the plan phase.
-  create_notification_channel = (
-    var.notification_email != "" && local.monitoring_project_key != null
-  )
+  # Resolved notification email per alert-enabled project.
+  # Per-project override takes precedence over the module-level default.
+  alert_project_emails = {
+    for k, v in local.alert_projects :
+    k => coalesce(try(v.notification_email, null), var.notification_email, "")
+  }
 }
 
-# Email notification channel for alert delivery
+# One email notification channel per alert-enabled project that has an email configured
 resource "google_monitoring_notification_channel" "email" {
-  count = local.create_notification_channel ? 1 : 0
+  for_each = {
+    for k, v in local.alert_projects :
+    k => v
+    if local.alert_project_emails[k] != ""
+  }
 
-  project      = local.monitoring_project_id
+  project      = google_project.this[each.key].project_id
   display_name = "Email Notification Channel"
   type         = "email"
 
   labels = {
-    email_address = var.notification_email
+    email_address = local.alert_project_emails[each.key]
   }
 
   depends_on = [google_project_service.this]
 }
 
-# Alert policy: CPU utilization threshold
+# Alert policy: CPU utilization threshold — one per alert-enabled project
 resource "google_monitoring_alert_policy" "cpu_utilization" {
-  count = local.monitoring_project_key != null ? 1 : 0
+  for_each = local.alert_projects
 
-  project      = local.monitoring_project_id
+  project      = google_project.this[each.key].project_id
   display_name = "High CPU Utilization"
   combiner     = "OR"
 
   conditions {
-    display_name = "CPU utilization above ${var.alert_thresholds.cpu_utilization * 100}%"
+    display_name = "CPU utilization above ${local.alert_project_thresholds[each.key].cpu_utilization * 100}%"
 
     condition_threshold {
       filter = join(" AND ", [
@@ -51,7 +58,7 @@ resource "google_monitoring_alert_policy" "cpu_utilization" {
       ])
       duration        = "60s"
       comparison      = "COMPARISON_GT"
-      threshold_value = var.alert_thresholds.cpu_utilization
+      threshold_value = local.alert_project_thresholds[each.key].cpu_utilization
 
       aggregations {
         alignment_period   = "60s"
@@ -61,8 +68,8 @@ resource "google_monitoring_alert_policy" "cpu_utilization" {
   }
 
   notification_channels = (
-    local.create_notification_channel
-    ? [google_monitoring_notification_channel.email[0].id]
+    contains(keys(google_monitoring_notification_channel.email), each.key)
+    ? [google_monitoring_notification_channel.email[each.key].id]
     : []
   )
 
@@ -73,16 +80,16 @@ resource "google_monitoring_alert_policy" "cpu_utilization" {
   depends_on = [google_monitoring_notification_channel.email]
 }
 
-# Alert policy: error log rate threshold
+# Alert policy: error log rate threshold — one per alert-enabled project
 resource "google_monitoring_alert_policy" "error_rate" {
-  count = local.monitoring_project_key != null ? 1 : 0
+  for_each = local.alert_projects
 
-  project      = local.monitoring_project_id
+  project      = google_project.this[each.key].project_id
   display_name = "High Error Rate"
   combiner     = "OR"
 
   conditions {
-    display_name = "Error log rate above ${var.alert_thresholds.error_rate} per second"
+    display_name = "Error log rate above ${local.alert_project_thresholds[each.key].error_rate} per second"
 
     condition_threshold {
       filter = join(" AND ", [
@@ -92,7 +99,7 @@ resource "google_monitoring_alert_policy" "error_rate" {
       ])
       duration        = "300s"
       comparison      = "COMPARISON_GT"
-      threshold_value = var.alert_thresholds.error_rate
+      threshold_value = local.alert_project_thresholds[each.key].error_rate
 
       aggregations {
         alignment_period   = "60s"
@@ -102,8 +109,8 @@ resource "google_monitoring_alert_policy" "error_rate" {
   }
 
   notification_channels = (
-    local.create_notification_channel
-    ? [google_monitoring_notification_channel.email[0].id]
+    contains(keys(google_monitoring_notification_channel.email), each.key)
+    ? [google_monitoring_notification_channel.email[each.key].id]
     : []
   )
 
@@ -114,16 +121,16 @@ resource "google_monitoring_alert_policy" "error_rate" {
   depends_on = [google_monitoring_notification_channel.email]
 }
 
-# Alert policy: API service request rate threshold
+# Alert policy: API service request rate threshold — one per alert-enabled project
 resource "google_monitoring_alert_policy" "service_usage" {
-  count = local.monitoring_project_key != null ? 1 : 0
+  for_each = local.alert_projects
 
-  project      = local.monitoring_project_id
+  project      = google_project.this[each.key].project_id
   display_name = "High Service API Request Rate"
   combiner     = "OR"
 
   conditions {
-    display_name = "API request rate above ${var.alert_thresholds.service_usage} per second"
+    display_name = "API request rate above ${local.alert_project_thresholds[each.key].service_usage} per second"
 
     condition_threshold {
       filter = join(" AND ", [
@@ -132,7 +139,7 @@ resource "google_monitoring_alert_policy" "service_usage" {
       ])
       duration        = "300s"
       comparison      = "COMPARISON_GT"
-      threshold_value = var.alert_thresholds.service_usage
+      threshold_value = local.alert_project_thresholds[each.key].service_usage
 
       aggregations {
         alignment_period   = "60s"
@@ -142,8 +149,8 @@ resource "google_monitoring_alert_policy" "service_usage" {
   }
 
   notification_channels = (
-    local.create_notification_channel
-    ? [google_monitoring_notification_channel.email[0].id]
+    contains(keys(google_monitoring_notification_channel.email), each.key)
+    ? [google_monitoring_notification_channel.email[each.key].id]
     : []
   )
 

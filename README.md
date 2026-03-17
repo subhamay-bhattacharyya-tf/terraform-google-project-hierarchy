@@ -99,8 +99,7 @@ module "gcp_project_hierarchy" {
       },
       "enable_alerts": true
     }
-  },
-  "monitoring_project_key": "github-cicd"
+  }
 }
 ```
 
@@ -137,10 +136,11 @@ module "gcp_project_hierarchy" {
 | `projects[].project_id` | Globally unique GCP project ID |
 | `projects[].folder_key` | Key of the parent folder |
 | `projects[].billing_account` | Per-project billing account override |
+| `projects[].notification_email` | Per-project alert email (overrides `var.notification_email`) |
+| `projects[].alert_thresholds` | Per-project threshold overrides (each field falls back to `var.alert_thresholds`) |
 | `projects[].services` | List of GCP API URLs to enable |
 | `projects[].labels` | Key-value labels to apply |
 | `projects[].enable_alerts` | Create alert policies in this project |
-| `monitoring_project_key` | Project key that hosts monitoring resources |
 
 ## Outputs
 
@@ -151,14 +151,14 @@ module "gcp_project_hierarchy" {
 | `project_ids` | Map of project key to GCP project ID |
 | `project_numbers` | Map of project key to GCP project number |
 | `enabled_services` | Map of `project_key/service` to service name |
-| `alert_policy_ids` | Resource names of created monitoring alert policies |
-| `notification_channel_id` | Resource name of the email notification channel |
+| `alert_policy_ids` | Map of project key to list of monitoring alert policy resource names |
+| `notification_channel_ids` | Map of project key to email notification channel resource name |
 
 ## Notes
 
 - **Folder nesting**: Supports up to 3 levels of folder nesting under the organization. Level classification is based on `parent_type` and `parent_key` in the hierarchy_config.
 - **Billing**: Billing is managed via `google_project_billing_info`, decoupled from project creation. Set `default_billing_account` or per-project `billing_account` in the config.
-- **Monitoring**: Alert policies are created in the project identified by `monitoring_project_key`. The `monitoring.googleapis.com` API must be enabled on that project.
+- **Monitoring**: Alert policies are created inside each project that has `enable_alerts = true`. The `monitoring.googleapis.com` API must be enabled on any project using alerts.
 - **Service enablement**: APIs are enabled after billing association. `disable_on_destroy = false` prevents service disruption during Terraform destroy.
 
 ## License

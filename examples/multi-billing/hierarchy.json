@@ -1,0 +1,106 @@
+{
+  "folders": {
+    "finance": {
+      "display_name": "Finance",
+      "parent_type": "organization"
+    },
+    "engineering": {
+      "display_name": "Engineering",
+      "parent_type": "organization"
+    }
+  },
+  "projects": {
+    "finance-reporting": {
+      "name": "Finance Reporting",
+      "project_id": "prj-finance-reporting",
+      "folder_key": "finance",
+      "billing_account": "FINANCE-BILLING-ACCT",
+      "notification_email": "FINANCE-ALERT-EMAIL",
+      "alert_thresholds": {
+        "cpu_utilization": 0.75,
+        "error_rate": 0.02,
+        "service_usage": 200.0
+      },
+      "services": [
+        "bigquery.googleapis.com",
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "finance",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "deletion_policy": "DELETE"
+    },
+    "finance-analytics": {
+      "name": "Finance Analytics",
+      "project_id": "prj-finance-analytics",
+      "folder_key": "finance",
+      "billing_account": "FINANCE-BILLING-ACCT",
+      "notification_email": "FINANCE-ALERT-EMAIL",
+      "alert_thresholds": {
+        "cpu_utilization": 0.85,
+        "error_rate": 0.05,
+        "service_usage": 1000.0
+      },
+      "services": [
+        "bigquery.googleapis.com",
+        "storage.googleapis.com",
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "finance",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "deletion_policy": "DELETE"
+    },
+    "eng-platform": {
+      "name": "Engineering Platform",
+      "project_id": "prj-eng-platform",
+      "folder_key": "engineering",
+      "billing_account": "ENGINEERING-BILLING-ACCT",
+      "notification_email": "ENGINEERING-ALERT-EMAIL",
+      "alert_thresholds": {
+        "cpu_utilization": 0.9,
+        "error_rate": 0.1,
+        "service_usage": 500.0
+      },
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "serviceusage.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "engineering",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "deletion_policy": "DELETE"
+    },
+    "eng-sandbox": {
+      "name": "Engineering Sandbox",
+      "project_id": "prj-eng-sandbox",
+      "folder_key": "engineering",
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com"
+      ],
+      "labels": {
+        "env": "dev",
+        "team": "engineering",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": false,
+      "deletion_policy": "DELETE"
+    }
+  }
+}

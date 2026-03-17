@@ -99,6 +99,11 @@ output "enabled_services" {
 }
 
 output "alert_policy_ids" {
-  description = "Monitoring alert policy IDs."
+  description = "Monitoring alert policy IDs by project key."
   value       = module.gcp_project_hierarchy.alert_policy_ids
+}
+
+output "notification_channel_ids" {
+  description = "Email notification channel resource names by project key."
+  value       = module.gcp_project_hierarchy.notification_channel_ids
 }

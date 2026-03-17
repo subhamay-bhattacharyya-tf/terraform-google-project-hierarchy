@@ -46,6 +46,13 @@ locals {
     if try(v.enable_alerts, false)
   }
 
-  # Optional key of the project that hosts monitoring resources
-  monitoring_project_key = try(var.hierarchy_config.monitoring_project_key, null)
+  # Per-project resolved alert thresholds.
+  # Each field falls back individually: per-project value > module-level default.
+  alert_project_thresholds = {
+    for k, v in local.alert_projects : k => {
+      cpu_utilization = try(v.alert_thresholds.cpu_utilization, null) != null ? v.alert_thresholds.cpu_utilization : var.alert_thresholds.cpu_utilization
+      error_rate      = try(v.alert_thresholds.error_rate, null) != null ? v.alert_thresholds.error_rate : var.alert_thresholds.error_rate
+      service_usage   = try(v.alert_thresholds.service_usage, null) != null ? v.alert_thresholds.service_usage : var.alert_thresholds.service_usage
+    }
+  }
 }

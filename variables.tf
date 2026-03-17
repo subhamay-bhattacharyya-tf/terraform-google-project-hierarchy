@@ -71,7 +71,6 @@ variable "hierarchy_config" {
           "enable_alerts": true
         }
       },
-      "monitoring_project_key": "github-cicd"
     }
   EOT
   type = object({
@@ -81,15 +80,20 @@ variable "hierarchy_config" {
       parent_key   = optional(string)
     })), {})
     projects = optional(map(object({
-      name            = string
-      project_id      = string
-      folder_key      = string
-      billing_account = optional(string)
+      name               = string
+      project_id         = string
+      folder_key         = string
+      billing_account    = optional(string)
+      notification_email = optional(string)
+      alert_thresholds = optional(object({
+        cpu_utilization = optional(number)
+        error_rate      = optional(number)
+        service_usage   = optional(number)
+      }))
       services        = optional(list(string), [])
       labels          = optional(map(string), {})
       enable_alerts   = optional(bool, false)
       deletion_policy = optional(string, "PREVENT")
     })), {})
-    monitoring_project_key = optional(string)
   })
 }

@@ -36,15 +36,17 @@ output "enabled_services" {
 }
 
 output "alert_policy_ids" {
-  description = "Resource names of all created monitoring alert policies."
-  value = compact([
-    try(google_monitoring_alert_policy.cpu_utilization[0].name, ""),
-    try(google_monitoring_alert_policy.error_rate[0].name, ""),
-    try(google_monitoring_alert_policy.service_usage[0].name, ""),
-  ])
+  description = "Map of project key to list of monitoring alert policy resource names for that project."
+  value = {
+    for k in keys(local.alert_projects) : k => compact([
+      try(google_monitoring_alert_policy.cpu_utilization[k].name, ""),
+      try(google_monitoring_alert_policy.error_rate[k].name, ""),
+      try(google_monitoring_alert_policy.service_usage[k].name, ""),
+    ])
+  }
 }
 
-output "notification_channel_id" {
-  description = "Resource name of the monitoring email notification channel, if created."
-  value       = try(google_monitoring_notification_channel.email[0].name, null)
+output "notification_channel_ids" {
+  description = "Map of project key to email notification channel resource name, for projects that have one configured."
+  value       = { for k, v in google_monitoring_notification_channel.email : k => v.name }
 }

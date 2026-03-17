@@ -10,6 +10,115 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestGoogleProjectHierarchyMultiBilling verifies that projects can be
+// provisioned under separate billing accounts, notification emails, and
+// per-project alert thresholds within a single hierarchy.
+//
+// Environment variables:
+//
+//	GCP_ORGANIZATION_ID              (required)
+//	GCP_FINANCE_BILLING_ACCOUNT      (optional) — billing account for Finance projects
+//	GCP_ENGINEERING_BILLING_ACCOUNT  (optional) — billing account for Engineering projects
+//	GCP_BILLING_ACCOUNT_ID           (optional) — fallback default billing account
+//	GCP_FINANCE_NOTIFICATION_EMAIL   (optional) — alert email for Finance projects
+//	GCP_ENGINEERING_NOTIFICATION_EMAIL (optional) — alert email for Engineering projects
+func TestGoogleProjectHierarchyMultiBilling(t *testing.T) {
+	t.Parallel()
+
+	organizationID := mustEnv(t, "GCP_ORGANIZATION_ID")
+	financeBilling := mustEnvOptional("GCP_FINANCE_BILLING_ACCOUNT")
+	engineeringBilling := mustEnvOptional("GCP_ENGINEERING_BILLING_ACCOUNT")
+	defaultBilling := mustEnvOptional("GCP_BILLING_ACCOUNT_ID")
+	financeEmail := mustEnvOptional("GCP_FINANCE_NOTIFICATION_EMAIL")
+	engineeringEmail := mustEnvOptional("GCP_ENGINEERING_NOTIFICATION_EMAIL")
+
+	suffix := randomProjectSuffix()
+
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../examples/multi-billing",
+		Vars: map[string]interface{}{
+			"organization_id":               organizationID,
+			"finance_billing_account":       financeBilling,
+			"engineering_billing_account":   engineeringBilling,
+			"default_billing_account":       defaultBilling,
+			"finance_notification_email":    financeEmail,
+			"engineering_notification_email": engineeringEmail,
+			"test_suffix":                   suffix,
+		},
+		NoColor: true,
+	}
+
+	defer terraform.Destroy(t, terraformOptions)
+
+	terraform.InitAndApply(t, terraformOptions)
+
+	// --- Folders ---
+	folderIDs := terraform.OutputMap(t, terraformOptions, "folder_ids")
+	require.NotEmpty(t, folderIDs, "Expected at least one folder to be created")
+	assertOutputKeyPresent(t, folderIDs, "finance", "folder")
+	assertOutputKeyPresent(t, folderIDs, "engineering", "folder")
+
+	// --- Projects ---
+	projectIDs := terraform.OutputMap(t, terraformOptions, "project_ids")
+	require.NotEmpty(t, projectIDs, "Expected at least one project to be created")
+	assertOutputKeyPresent(t, projectIDs, "finance-reporting", "project")
+	assertOutputKeyPresent(t, projectIDs, "finance-analytics", "project")
+	assertOutputKeyPresent(t, projectIDs, "eng-platform", "project")
+	assertOutputKeyPresent(t, projectIDs, "eng-sandbox", "project")
+
+	// Validate suffixed project IDs match expected values.
+	assert.Equal(t, fmt.Sprintf("prj-finance-reporting-%s", suffix), projectIDs["finance-reporting"],
+		"finance-reporting project ID mismatch")
+	assert.Equal(t, fmt.Sprintf("prj-finance-analytics-%s", suffix), projectIDs["finance-analytics"],
+		"finance-analytics project ID mismatch")
+	assert.Equal(t, fmt.Sprintf("prj-eng-platform-%s", suffix), projectIDs["eng-platform"],
+		"eng-platform project ID mismatch")
+	assert.Equal(t, fmt.Sprintf("prj-eng-sandbox-%s", suffix), projectIDs["eng-sandbox"],
+		"eng-sandbox project ID mismatch")
+
+	// --- Project numbers ---
+	projectNumbers := terraform.OutputMap(t, terraformOptions, "project_numbers")
+	assertOutputKeyPresent(t, projectNumbers, "finance-reporting", "project number")
+	assertOutputKeyPresent(t, projectNumbers, "finance-analytics", "project number")
+	assertOutputKeyPresent(t, projectNumbers, "eng-platform", "project number")
+	assertOutputKeyPresent(t, projectNumbers, "eng-sandbox", "project number")
+
+	// --- Services ---
+	enabledServices := terraform.OutputMap(t, terraformOptions, "enabled_services")
+	assertServiceEnabled(t, enabledServices, "finance-reporting", "bigquery.googleapis.com")
+	assertServiceEnabled(t, enabledServices, "finance-reporting", "monitoring.googleapis.com")
+	assertServiceEnabled(t, enabledServices, "finance-analytics", "storage.googleapis.com")
+	assertServiceEnabled(t, enabledServices, "finance-analytics", "monitoring.googleapis.com")
+	assertServiceEnabled(t, enabledServices, "eng-platform", "serviceusage.googleapis.com")
+	assertServiceEnabled(t, enabledServices, "eng-platform", "monitoring.googleapis.com")
+	assertServiceEnabled(t, enabledServices, "eng-sandbox", "iam.googleapis.com")
+
+	// --- Alert policies: present for alert-enabled projects, absent for eng-sandbox ---
+	alertPolicyIDs := terraform.OutputJson(t, terraformOptions, "alert_policy_ids")
+	require.Contains(t, alertPolicyIDs, "finance-reporting",
+		"Expected alert policies for finance-reporting")
+	require.Contains(t, alertPolicyIDs, "finance-analytics",
+		"Expected alert policies for finance-analytics")
+	require.Contains(t, alertPolicyIDs, "eng-platform",
+		"Expected alert policies for eng-platform")
+	require.NotContains(t, alertPolicyIDs, "eng-sandbox",
+		"eng-sandbox has enable_alerts=false and should have no alert policies")
+
+	// --- Notification channels: present when email is configured ---
+	if financeEmail != "" {
+		channelIDs := terraform.OutputJson(t, terraformOptions, "notification_channel_ids")
+		require.Contains(t, channelIDs, "finance-reporting",
+			"Expected notification channel for finance-reporting when email is set")
+		require.Contains(t, channelIDs, "finance-analytics",
+			"Expected notification channel for finance-analytics when email is set")
+	}
+	if engineeringEmail != "" {
+		channelIDs := terraform.OutputJson(t, terraformOptions, "notification_channel_ids")
+		require.Contains(t, channelIDs, "eng-platform",
+			"Expected notification channel for eng-platform when email is set")
+	}
+}
+
 func TestGoogleProjectHierarchy(t *testing.T) {
 	t.Parallel()
 

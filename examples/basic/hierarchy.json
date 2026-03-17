@@ -20,6 +20,7 @@
       "name": "GitHub CICD",
       "project_id": "prj-shared-github-cicd",
       "folder_key": "platform",
+      "notification_email": "platform-alerts@example.com",
       "services": [
         "iam.googleapis.com",
         "cloudresourcemanager.googleapis.com",
@@ -52,6 +53,5 @@
       "enable_alerts": false,
       "deletion_policy": "DELETE"
     }
-  },
-  "monitoring_project_key": "github-cicd"
+  }
 }
