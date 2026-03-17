@@ -23,9 +23,11 @@
 ### 🚜 Refactor
 
 - Standardize formatting of project variables in hierarchy_config
+- Remove billing account and notification email from hierarchy.json and update related documentation
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
