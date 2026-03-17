@@ -18,7 +18,6 @@ resource "google_project" "this" {
   name            = each.value.name
   project_id      = each.value.project_id
   folder_id       = local.all_folder_names[each.value.folder_key]
-  billing_account = try(each.value.billing_account, var.default_billing_account)
 
   labels          = try(each.value.labels, {})
   deletion_policy = try(each.value.deletion_policy, "PREVENT")

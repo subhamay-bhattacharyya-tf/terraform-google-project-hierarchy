@@ -2,20 +2,20 @@
 # terraform-google-project-hierarchy - Billing Configuration
 # ============================================================================
 #
-# Billing accounts are associated with projects via the billing_account
-# attribute on each google_project resource (see projects.tf).
+# Billing accounts are associated with projects via google_billing_project_info.
+# This is a separate resource from google_project so that google_project_service
+# can express an explicit depends_on, ensuring billing is fully propagated
+# before any service enablement API calls are made.
 #
 # Priority: per-project billing_account > var.default_billing_account
-#
-# To manage billing budgets, use google_billing_budget from the google-beta
-# provider. Example:
-#
-#   resource "google_billing_budget" "this" {
-#     billing_account = var.default_billing_account
-#     display_name    = "Project budget"
-#     amount {
-#       specified_amount { currency_code = "USD"; units = "1000" }
-#     }
-#     threshold_rules { threshold_percent = 0.8 }
-#   }
 # ============================================================================
+
+resource "google_billing_project_info" "this" {
+  for_each = {
+    for k, v in local.projects : k => v
+    if try(v.billing_account, var.default_billing_account) != null
+  }
+
+  project         = google_project.this[each.key].project_id
+  billing_account = try(each.value.billing_account, var.default_billing_account)
+}

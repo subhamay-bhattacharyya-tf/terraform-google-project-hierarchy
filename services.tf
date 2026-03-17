@@ -10,5 +10,5 @@ resource "google_project_service" "this" {
   disable_on_destroy         = false
   disable_dependent_services = false
 
-  depends_on = [google_project.this]
+  depends_on = [google_project.this, google_billing_project_info.this]
 }
