@@ -24,7 +24,7 @@ locals {
   # Alert-enabled projects that also have a billing account (required for budgets).
   alert_projects_with_billing = {
     for k, v in local.alert_projects : k => v
-    if (v.billing_account != null ? v.billing_account : var.default_billing_account) != null
+    if(v.billing_account != null ? v.billing_account : var.default_billing_account) != null
   }
 }
 
