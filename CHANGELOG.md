@@ -18,6 +18,7 @@
 - Update notification channel and alert policy conditions to use monitoring_project_key
 - Add deletion_protection to folder resources for consistency
 - Ensure fallback for notification email in alert projects
+- Update test command regex for Google Project Hierarchy tests
 
 ### 🚜 Refactor
 
@@ -25,6 +26,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
