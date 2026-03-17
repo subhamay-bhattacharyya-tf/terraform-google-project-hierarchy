@@ -24,7 +24,7 @@ locals {
   # Alert-enabled projects that also have a billing account (required for budgets).
   alert_projects_with_billing = {
     for k, v in local.alert_projects : k => v
-    if try(v.billing_account, var.default_billing_account) != null
+    if (v.billing_account != null ? v.billing_account : var.default_billing_account) != null
   }
 }
 
@@ -51,7 +51,7 @@ resource "google_monitoring_notification_channel" "email" {
 resource "google_billing_budget" "this" {
   for_each = local.alert_projects_with_billing
 
-  billing_account = try(each.value.billing_account, var.default_billing_account)
+  billing_account = each.value.billing_account != null ? each.value.billing_account : var.default_billing_account
   display_name    = "${each.value.name} - Billing Alert"
 
   budget_filter {

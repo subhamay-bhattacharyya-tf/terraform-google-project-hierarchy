@@ -13,9 +13,9 @@
 resource "google_billing_project_info" "this" {
   for_each = {
     for k, v in local.projects : k => v
-    if try(v.billing_account, var.default_billing_account) != null
+    if (v.billing_account != null ? v.billing_account : var.default_billing_account) != null
   }
 
   project         = google_project.this[each.key].project_id
-  billing_account = try(each.value.billing_account, var.default_billing_account)
+  billing_account = each.value.billing_account != null ? each.value.billing_account : var.default_billing_account
 }
