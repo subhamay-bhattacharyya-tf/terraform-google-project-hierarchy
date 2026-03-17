@@ -38,7 +38,7 @@ variable "alert_thresholds" {
     threshold_rules = optional(list(object({
       threshold_percent = number
       spend_basis       = optional(string, "CURRENT_SPEND")
-    })), [
+      })), [
       { threshold_percent = 0.25, spend_basis = "CURRENT_SPEND" },
       { threshold_percent = 0.5, spend_basis = "CURRENT_SPEND" },
       { threshold_percent = 1.0, spend_basis = "CURRENT_SPEND" },
@@ -99,11 +99,11 @@ variable "hierarchy_config" {
           spend_basis       = optional(string, "CURRENT_SPEND")
         })))
       }))
-      services                = optional(list(string), [])
-      labels                  = optional(map(string), {})
-      enable_alerts           = optional(bool, false)
-      enable_service_account  = optional(bool, false)
-      deletion_policy         = optional(string, "PREVENT")
+      services               = optional(list(string), [])
+      labels                 = optional(map(string), {})
+      enable_alerts          = optional(bool, false)
+      enable_service_account = optional(bool, false)
+      deletion_policy        = optional(string, "PREVENT")
     })), {})
   })
 }
