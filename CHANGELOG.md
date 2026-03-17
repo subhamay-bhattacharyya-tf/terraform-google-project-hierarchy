@@ -23,6 +23,7 @@
 - Update alert thresholds and formatting in variables.tf
 - Improve billing account handling in alerts and billing configurations
 - Remove unnecessary whitespace in billing account checks
+- Improve billing account handling using coalesce and try functions
 
 ### 🚜 Refactor
 
@@ -31,6 +32,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
