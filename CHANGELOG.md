@@ -44,10 +44,15 @@
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
+- Update CHANGELOG.md [skip ci]
 
 ### 🎨 Styling
 
 - Format alignment of project resource attributes for consistency
+
+### 🧪 Testing
+
+- Update alert policies to billing budgets in TestGoogleProjectHierarchyMultiBilling
 
 ### ⚙️ Miscellaneous Tasks
 
