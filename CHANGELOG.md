@@ -10,6 +10,7 @@
 - Add deletion_policy to projects and update hierarchy configuration for unique project IDs
 - Enhance hierarchy configuration to include test_suffix for folder display names
 - Implement billing account association via google_billing_project_info and update dependencies
+- Enhance GCP Project Hierarchy Module with Multi-Billing and Alert Customization
 
 ### 🐛 Bug Fixes
 
@@ -22,6 +23,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
