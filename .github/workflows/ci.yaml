@@ -64,6 +64,7 @@ jobs:
       matrix:
         example:
           - examples/basic
+          - examples/multi-billing
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -122,15 +123,30 @@ jobs:
           go mod download
         working-directory: test
 
-      - name: Run Terratest - GCP Project Hierarchy
-        id: project-hierarchy-test
+      - name: Run Terratest - Basic
+        id: test-basic
         run: |
           set -o pipefail
           go test -v -timeout 30m -run TestGoogleProjectHierarchy \
-            ./google_project_hierarchy_test.go ./helpers_test.go 2>&1 | tee test_output.txt
-          echo "## GCP Project Hierarchy Test Results" >> $GITHUB_STEP_SUMMARY
+            ./google_project_hierarchy_test.go ./helpers_test.go 2>&1 | tee test_basic_output.txt
+          echo "## Basic Test Results" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat test_output.txt >> $GITHUB_STEP_SUMMARY
+          cat test_basic_output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        working-directory: test
+        env:
+          GCP_ORGANIZATION_ID: ${{ vars.GCP_ORGANIZATION_ID }}
+          GCP_BILLING_ACCOUNT_ID: ${{ vars.GCP_BILLING_ACCOUNT_ID }}
+
+      - name: Run Terratest - Multi-Billing
+        id: test-multi-billing
+        run: |
+          set -o pipefail
+          go test -v -timeout 30m -run TestGoogleProjectHierarchyMultiBilling \
+            ./google_project_hierarchy_test.go ./helpers_test.go 2>&1 | tee test_multi_billing_output.txt
+          echo "## Multi-Billing Test Results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat test_multi_billing_output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
         working-directory: test
         env:
