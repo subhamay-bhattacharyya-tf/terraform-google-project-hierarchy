@@ -21,6 +21,8 @@
 - Ensure fallback for notification email in alert projects
 - Update test command regex for Google Project Hierarchy tests
 - Update alert thresholds and formatting in variables.tf
+- Improve billing account handling in alerts and billing configurations
+- Remove unnecessary whitespace in billing account checks
 
 ### 🚜 Refactor
 
@@ -29,6 +31,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
