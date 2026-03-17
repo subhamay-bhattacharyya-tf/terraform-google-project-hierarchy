@@ -12,6 +12,7 @@
 - Implement billing account association via google_billing_project_info and update dependencies
 - Enhance GCP Project Hierarchy Module with Multi-Billing and Alert Customization
 - Add multi-billing test case to Terratest workflow
+- Implement billing budget alerts and service accounts for GCP projects
 
 ### 🐛 Bug Fixes
 
@@ -19,6 +20,7 @@
 - Add deletion_protection to folder resources for consistency
 - Ensure fallback for notification email in alert projects
 - Update test command regex for Google Project Hierarchy tests
+- Update alert thresholds and formatting in variables.tf
 
 ### 🚜 Refactor
 
@@ -27,6 +29,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
