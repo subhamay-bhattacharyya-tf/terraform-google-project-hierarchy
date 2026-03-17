@@ -1,10 +1,11 @@
 # ============================================================================
-# terraform-google-project-hierarchy - Monitoring and Alerting
+# terraform-google-project-hierarchy - Billing Budget Alerts
 # ============================================================================
 #
-# One notification channel and three alert policies are created per project
-# that has enable_alerts = true. Each project manages its own monitoring
-# resources independently.
+# One notification channel and one billing budget are created per project
+# that has enable_alerts = true and a billing account assigned.
+#
+# Budget display name: "<project name> - Billing Alert"
 #
 # Notification email priority (per project):
 #   1. projects[key].notification_email  (per-project override in hierarchy_config)
@@ -18,6 +19,12 @@ locals {
   alert_project_emails = {
     for k, v in local.alert_projects :
     k => try(coalesce(try(v.notification_email, null), var.notification_email), "")
+  }
+
+  # Alert-enabled projects that also have a billing account (required for budgets).
+  alert_projects_with_billing = {
+    for k, v in local.alert_projects : k => v
+    if try(v.billing_account, var.default_billing_account) != null
   }
 }
 
@@ -40,123 +47,43 @@ resource "google_monitoring_notification_channel" "email" {
   depends_on = [google_project_service.this]
 }
 
-# Alert policy: CPU utilization threshold — one per alert-enabled project
-resource "google_monitoring_alert_policy" "cpu_utilization" {
-  for_each = local.alert_projects
+# Billing budget alert — one per alert-enabled project with a billing account
+resource "google_billing_budget" "this" {
+  for_each = local.alert_projects_with_billing
 
-  project      = google_project.this[each.key].project_id
-  display_name = "High CPU Utilization"
-  combiner     = "OR"
+  billing_account = try(each.value.billing_account, var.default_billing_account)
+  display_name    = "${each.value.name} - Billing Alert"
 
-  conditions {
-    display_name = "CPU utilization above ${local.alert_project_thresholds[each.key].cpu_utilization * 100}%"
+  budget_filter {
+    projects = ["projects/${google_project.this[each.key].number}"]
+  }
 
-    condition_threshold {
-      filter = join(" AND ", [
-        "metric.type=\"compute.googleapis.com/instance/cpu/utilization\"",
-        "resource.type=\"gce_instance\"",
-      ])
-      duration        = "60s"
-      comparison      = "COMPARISON_GT"
-      threshold_value = local.alert_project_thresholds[each.key].cpu_utilization
-
-      aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_MEAN"
-      }
+  amount {
+    specified_amount {
+      currency_code = "USD"
+      units         = tostring(local.alert_project_thresholds[each.key].billing_amount)
     }
   }
 
-  notification_channels = (
-    contains(keys(google_monitoring_notification_channel.email), each.key)
-    ? [google_monitoring_notification_channel.email[each.key].id]
-    : []
-  )
-
-  alert_strategy {
-    auto_close = "604800s"
-  }
-
-  depends_on = [google_monitoring_notification_channel.email]
-}
-
-# Alert policy: error log rate threshold — one per alert-enabled project
-resource "google_monitoring_alert_policy" "error_rate" {
-  for_each = local.alert_projects
-
-  project      = google_project.this[each.key].project_id
-  display_name = "High Error Rate"
-  combiner     = "OR"
-
-  conditions {
-    display_name = "Error log rate above ${local.alert_project_thresholds[each.key].error_rate} per second"
-
-    condition_threshold {
-      filter = join(" AND ", [
-        "metric.type=\"logging.googleapis.com/log_entry_count\"",
-        "resource.type=\"global\"",
-        "metric.labels.severity=\"ERROR\"",
-      ])
-      duration        = "300s"
-      comparison      = "COMPARISON_GT"
-      threshold_value = local.alert_project_thresholds[each.key].error_rate
-
-      aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_RATE"
-      }
+  dynamic "threshold_rules" {
+    for_each = local.alert_project_thresholds[each.key].threshold_rules
+    content {
+      threshold_percent = threshold_rules.value.threshold_percent
+      spend_basis       = threshold_rules.value.spend_basis
     }
   }
 
-  notification_channels = (
-    contains(keys(google_monitoring_notification_channel.email), each.key)
-    ? [google_monitoring_notification_channel.email[each.key].id]
-    : []
-  )
-
-  alert_strategy {
-    auto_close = "604800s"
+  all_updates_rule {
+    monitoring_notification_channels = (
+      contains(keys(google_monitoring_notification_channel.email), each.key)
+      ? [google_monitoring_notification_channel.email[each.key].id]
+      : []
+    )
+    disable_default_iam_recipients = false
   }
 
-  depends_on = [google_monitoring_notification_channel.email]
-}
-
-# Alert policy: API service request rate threshold — one per alert-enabled project
-resource "google_monitoring_alert_policy" "service_usage" {
-  for_each = local.alert_projects
-
-  project      = google_project.this[each.key].project_id
-  display_name = "High Service API Request Rate"
-  combiner     = "OR"
-
-  conditions {
-    display_name = "API request rate above ${local.alert_project_thresholds[each.key].service_usage} per second"
-
-    condition_threshold {
-      filter = join(" AND ", [
-        "metric.type=\"serviceruntime.googleapis.com/api/request_count\"",
-        "resource.type=\"consumed_api\"",
-      ])
-      duration        = "300s"
-      comparison      = "COMPARISON_GT"
-      threshold_value = local.alert_project_thresholds[each.key].service_usage
-
-      aggregations {
-        alignment_period   = "60s"
-        per_series_aligner = "ALIGN_RATE"
-      }
-    }
-  }
-
-  notification_channels = (
-    contains(keys(google_monitoring_notification_channel.email), each.key)
-    ? [google_monitoring_notification_channel.email[each.key].id]
-    : []
-  )
-
-  alert_strategy {
-    auto_close = "604800s"
-  }
-
-  depends_on = [google_monitoring_notification_channel.email]
+  depends_on = [
+    google_billing_project_info.this,
+    google_monitoring_notification_channel.email,
+  ]
 }

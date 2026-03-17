@@ -15,9 +15,13 @@
       "project_id": "prj-finance-reporting",
       "folder_key": "finance",
       "alert_thresholds": {
-        "cpu_utilization": 0.75,
-        "error_rate": 0.02,
-        "service_usage": 200.0
+        "billing_amount": 200,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
       },
       "services": [
         "bigquery.googleapis.com",
@@ -31,6 +35,7 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
+      "enable_service_account": true,
       "deletion_policy": "DELETE"
     },
     "finance-analytics": {
@@ -38,9 +43,13 @@
       "project_id": "prj-finance-analytics",
       "folder_key": "finance",
       "alert_thresholds": {
-        "cpu_utilization": 0.85,
-        "error_rate": 0.05,
-        "service_usage": 1000.0
+        "billing_amount": 500,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
       },
       "services": [
         "bigquery.googleapis.com",
@@ -55,6 +64,7 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
+      "enable_service_account": true,
       "deletion_policy": "DELETE"
     },
     "eng-platform": {
@@ -62,9 +72,13 @@
       "project_id": "prj-eng-platform",
       "folder_key": "engineering",
       "alert_thresholds": {
-        "cpu_utilization": 0.9,
-        "error_rate": 0.1,
-        "service_usage": 500.0
+        "billing_amount": 300,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
       },
       "services": [
         "iam.googleapis.com",
@@ -78,6 +92,7 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
+      "enable_service_account": true,
       "deletion_policy": "DELETE"
     },
     "eng-sandbox": {

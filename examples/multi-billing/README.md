@@ -1,4 +1,4 @@
-# Example: Multi-Billing, Multi-Threshold, Multi-Notification GCP Hierarchy
+# Example: Multi-Billing, Per-Team Billing Budget Alert GCP Hierarchy
 
 This example demonstrates three independent per-project overrides working together in a single GCP organizational hierarchy using the `terraform-google-project-hierarchy` module:
 
@@ -6,19 +6,19 @@ This example demonstrates three independent per-project overrides working togeth
 |---|---|
 | **Per-project billing accounts** | Finance and Engineering each have a dedicated billing account; `eng-sandbox` falls back to the module default |
 | **Per-project notification emails** | Finance projects alert to a Finance ops mailbox; Engineering projects alert to an Engineering ops mailbox |
-| **Per-project alert thresholds** | Each production project defines its own CPU, error-rate, and service-usage thresholds tuned to its workload |
+| **Per-project billing budgets** | Each production project defines its own USD budget amount tuned to its expected spend |
 
-Use this as a reference for enterprise setups where cost allocation, on-call routing, and alerting sensitivity differ by department or workload type.
+Use this as a reference for enterprise setups where cost allocation, on-call routing, and budget thresholds differ by department or workload type.
 
 ## Architecture
 
 ```
 Organization
 ├── Finance (L0 folder)
-│   ├── finance-reporting  billing: Finance  │  alerts → finance-ops@  │  cpu≤75%  err≤0.02/s  svc≤200/s
-│   └── finance-analytics  billing: Finance  │  alerts → finance-ops@  │  cpu≤85%  err≤0.05/s  svc≤1000/s
+│   ├── finance-reporting  billing: Finance  │  alerts → finance-ops@  │  budget: $200
+│   └── finance-analytics  billing: Finance  │  alerts → finance-ops@  │  budget: $500
 └── Engineering (L0 folder)
-    ├── eng-platform  billing: Engineering  │  alerts → eng-ops@  │  cpu≤90%  err≤0.1/s  svc≤500/s
+    ├── eng-platform  billing: Engineering  │  alerts → eng-ops@  │  budget: $300
     └── eng-sandbox   billing: default      │  no alerts
 ```
 
@@ -42,16 +42,16 @@ Organization
 | `eng-platform` | `var.engineering_notification_email` (per-project) | yes |
 | `eng-sandbox` | — | no |
 
-### Alert Thresholds
+### Billing Budget Amounts
 
-| Project | CPU Utilization | Error Rate (per sec) | Service Usage (per sec) |
-|---|---|---|---|
-| `finance-reporting` | 75% | 0.02 | 200 |
-| `finance-analytics` | 85% | 0.05 | 1000 |
-| `eng-platform` | 90% | 0.1 | 500 |
-| `eng-sandbox` | — | — | — |
+| Project | Budget (USD) |
+|---|---|
+| `finance-reporting` | $200 |
+| `finance-analytics` | $500 |
+| `eng-platform` | $300 |
+| `eng-sandbox` | — (no alerts) |
 
-Fields not specified fall back to the module-level `var.alert_thresholds` defaults (cpu: 0.8, error: 0.05, service: 0.9). In this example all three thresholds are set explicitly on every alert-enabled project.
+Both `billing_amount` and `threshold_rules` fall back individually to `var.alert_thresholds` if not set per project. In this example all alert-enabled projects set both explicitly. Each rule specifies a `threshold_percent` and an optional `spend_basis` (`CURRENT_SPEND` or `FORECASTED_SPEND`).
 
 ## Resources Provisioned
 
@@ -62,7 +62,8 @@ Fields not specified fall back to the module-level `var.alert_thresholds` defaul
 | `google_billing_project_info` | Per-project billing associations (up to 3 distinct accounts) |
 | `google_project_service` | BigQuery, Storage, IAM, CRM, Service Usage, Monitoring APIs per project |
 | `google_monitoring_notification_channel` | One email channel per alert-enabled project (when email is set) |
-| `google_monitoring_alert_policy` | CPU, error rate, and service usage policies per alert-enabled project |
+| `google_billing_budget` | Billing budget alert per alert-enabled project with a billing account |
+| `google_service_account` | CI/CD service account per project with `enable_service_account = true` |
 
 ## Usage
 
@@ -136,7 +137,7 @@ projects = {
 }
 ```
 
-`alert_thresholds` values are plain numbers with no security sensitivity, so they are set directly in `hierarchy.json` with no substitution needed.
+`alert_thresholds.billing_amount` values are plain numbers with no security sensitivity, so they are set directly in `hierarchy.json` with no substitution needed.
 
 To add a new department:
 
@@ -166,9 +167,13 @@ To add a new department:
       "billing_account": "FINANCE-BILLING-ACCT",
       "notification_email": "FINANCE-ALERT-EMAIL",
       "alert_thresholds": {
-        "cpu_utilization": 0.75,
-        "error_rate": 0.02,
-        "service_usage": 200.0
+        "billing_amount": 200,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
       },
       "services": [
         "bigquery.googleapis.com",
@@ -186,9 +191,13 @@ To add a new department:
       "billing_account": "FINANCE-BILLING-ACCT",
       "notification_email": "FINANCE-ALERT-EMAIL",
       "alert_thresholds": {
-        "cpu_utilization": 0.85,
-        "error_rate": 0.05,
-        "service_usage": 1000.0
+        "billing_amount": 500,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
       },
       "services": [
         "bigquery.googleapis.com",
@@ -207,9 +216,13 @@ To add a new department:
       "billing_account": "ENGINEERING-BILLING-ACCT",
       "notification_email": "ENGINEERING-ALERT-EMAIL",
       "alert_thresholds": {
-        "cpu_utilization": 0.9,
-        "error_rate": 0.1,
-        "service_usage": 500.0
+        "billing_amount": 300,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
       },
       "services": [
         "iam.googleapis.com",
@@ -255,8 +268,9 @@ To add a new department:
 | `project_ids` | Map of project key to GCP project ID |
 | `project_numbers` | Map of project key to GCP project number |
 | `enabled_services` | Map of `project_key/service` to service name |
-| `alert_policy_ids` | Map of project key to list of monitoring alert policy resource names |
+| `billing_budget_ids` | Map of project key to billing budget resource name |
 | `notification_channel_ids` | Map of project key to email notification channel resource name |
+| `service_account_emails` | Map of project key to CI/CD service account email |
 
 ## Requirements
 
@@ -273,7 +287,8 @@ To add a new department:
 | `resourcemanager.projects.create` | Project Creator |
 | `billing.resourceAssociations.create` | Billing Account User on **each** billing account used |
 | `serviceusage.services.enable` | Service Usage Admin |
-| `monitoring.alertPolicies.create` | Monitoring AlertPolicy Editor |
+| `billing.budgets.create` | Billing Budget Admin |
+| `iam.serviceAccounts.create` | Service Account Admin |
 | `monitoring.notificationChannels.create` | Monitoring NotificationChannel Editor |
 
 > **Note:** The principal running Terraform must hold Billing Account User on every billing account referenced — not just the default.
@@ -281,6 +296,7 @@ To add a new department:
 ## Notes
 
 - **Secrets**: Never commit billing account IDs or email addresses to source control. Use `terraform.tfvars` (gitignored) or environment variables (`TF_VAR_finance_billing_account`) to supply them at runtime.
-- **Partial threshold overrides**: Per-project `alert_thresholds` fields are individually optional. You can override only `cpu_utilization` and leave `error_rate` and `service_usage` to inherit the module-level `var.alert_thresholds` defaults.
-- **No alerts on sandbox**: `eng-sandbox` sets `"enable_alerts": false` and omits `monitoring.googleapis.com` from its services — no monitoring resources are created for it.
+- **Partial threshold overrides**: Both `alert_thresholds.billing_amount` and `alert_thresholds.threshold_rules` are individually optional per project. If omitted, each falls back to the module-level `var.alert_thresholds` defaults (`billing_amount`: $1, `threshold_rules`: 25%/50%/100% actual + 100% forecasted).
+- **No alerts on sandbox**: `eng-sandbox` sets `"enable_alerts": false` and `"enable_service_account": false` — no billing budget, notification channel, or service account is created for it.
+- **Service accounts**: Each production project sets `"enable_service_account": true`, creating a `google_service_account` named `SA-<project name>` (account ID `sa-<project-key>`). Use the `service_account_emails` output to wire these into your GitHub CI/CD pipelines.
 - **Destruction**: All projects use `deletion_policy = "DELETE"` to allow `terraform destroy` to complete without manual intervention. For production, omit this field or set it to `"PREVENT"`.

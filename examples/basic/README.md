@@ -23,7 +23,8 @@ Organization
 | `google_project` | `github-cicd`, `data-warehouse` |
 | `google_billing_project_info` | Default billing account on both projects |
 | `google_project_service` | IAM, CRM, BigQuery, Storage, Monitoring APIs |
-| `google_monitoring_alert_policy` | CPU, error rate, and service usage alerts on `github-cicd` |
+| `google_billing_budget` | Billing budget alert on `github-cicd` |
+| `google_service_account` | CI/CD service account on `github-cicd` (`SA-GitHub CICD`) |
 | `google_monitoring_notification_channel` | Email notification channel (when `notification_email` is set) |
 
 ## Usage
@@ -143,7 +144,8 @@ Edit `hierarchy.json` to add folders and projects. The module resolves parent re
 | `project_ids` | Map of project key to GCP project ID |
 | `project_numbers` | Map of project key to GCP project number |
 | `enabled_services` | Map of `project_key/service` to service name |
-| `alert_policy_ids` | Resource names of created monitoring alert policies |
+| `billing_budget_ids` | Map of project key to billing budget resource name |
+| `service_account_emails` | Map of project key to CI/CD service account email |
 
 ## Requirements
 
@@ -160,11 +162,13 @@ Edit `hierarchy.json` to add folders and projects. The module resolves parent re
 | `resourcemanager.projects.create` | Project Creator |
 | `billing.resourceAssociations.create` | Billing Account User |
 | `serviceusage.services.enable` | Service Usage Admin |
-| `monitoring.alertPolicies.create` | Monitoring AlertPolicy Editor |
+| `billing.budgets.create` | Billing Budget Admin |
+| `iam.serviceAccounts.create` | Service Account Admin |
 
 ## Notes
 
 - **Billing**: Both projects inherit `billing_account` from the module-level `default_billing_account`. To override per project, add a `"billing_account"` field to the project entry in `hierarchy.json`. See the [multi-billing example](../multi-billing/) for a full demonstration.
-- **Monitoring**: Alert policies are created inside each project that has `"enable_alerts": true`. That project must have `monitoring.googleapis.com` in its `services` list.
+- **Service accounts**: Set `"enable_service_account": true` on a project to create a service account named `SA-<project name>` (account ID `sa-<project-key>`). Intended for GitHub CI/CD pipelines.
+- **Billing budgets**: A billing budget is created for each project with `"enable_alerts": true` and a billing account assigned. Threshold rules are configurable per project via `alert_thresholds.threshold_rules` in the JSON config; if omitted, they default to 25%, 50%, 100% actual spend + 100% forecasted. GCP notifies billing account IAM members automatically; set `notification_email` to also route alerts to a specific address.
 - **Project IDs**: GCP project IDs are globally unique and cannot be reused after deletion for 30 days. The `test_suffix` variable is used by automated tests to avoid conflicts across runs.
 - **Destruction**: Both projects use `deletion_policy = "DELETE"` so `terraform destroy` can remove them without manual intervention. For production use, omit this field or set it to `"PREVENT"`.

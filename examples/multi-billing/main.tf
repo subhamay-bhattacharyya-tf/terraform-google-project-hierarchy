@@ -1,15 +1,15 @@
 # ============================================================================
-# examples/multi-billing - Multi-Threshold, Per-Team Alert Policy Example
+# examples/multi-billing - Per-Team Billing Budget Alert Example
 # ============================================================================
 #
-# This example demonstrates per-project overrides within a single hierarchy:
+# This example demonstrates per-project billing budget overrides within a
+# single hierarchy:
 #
-#   1. Alert thresholds  — Each production project defines its own CPU,
-#                          error-rate, and service-usage thresholds tuned to
-#                          its workload characteristics.
+#   1. Billing budgets   — Each production project defines its own billing
+#                          amount threshold tuned to its expected spend.
 #
 #   2. Selective alerting — eng-sandbox has enable_alerts=false and therefore
-#                           receives no monitoring alert policies.
+#                           receives no billing budget alert.
 #
 #   3. Folder organisation — Finance and Engineering projects are grouped into
 #                            their own top-level folders under the organisation.
@@ -99,12 +99,17 @@ output "enabled_services" {
   value       = module.gcp_project_hierarchy.enabled_services
 }
 
-output "alert_policy_ids" {
-  description = "Monitoring alert policy IDs by project key."
-  value       = module.gcp_project_hierarchy.alert_policy_ids
+output "billing_budget_ids" {
+  description = "Billing budget resource names by project key."
+  value       = module.gcp_project_hierarchy.billing_budget_ids
 }
 
 output "notification_channel_ids" {
   description = "Email notification channel resource names by project key."
   value       = module.gcp_project_hierarchy.notification_channel_ids
+}
+
+output "service_account_emails" {
+  description = "Service account emails by project key."
+  value       = module.gcp_project_hierarchy.service_account_emails
 }

@@ -39,9 +39,7 @@ module "gcp_project_hierarchy" {
   notification_email      = var.notification_email
 
   alert_thresholds = {
-    cpu_utilization = 0.8
-    error_rate      = 0.05
-    service_usage   = 100.0
+    billing_amount = 50
   }
 
   hierarchy_config = local.hierarchy_config
@@ -98,12 +96,17 @@ output "enabled_services" {
   value       = module.gcp_project_hierarchy.enabled_services
 }
 
-output "alert_policy_ids" {
-  description = "Monitoring alert policy IDs by project key."
-  value       = module.gcp_project_hierarchy.alert_policy_ids
+output "billing_budget_ids" {
+  description = "Billing budget resource names by project key."
+  value       = module.gcp_project_hierarchy.billing_budget_ids
 }
 
 output "notification_channel_ids" {
   description = "Email notification channel resource names by project key."
   value       = module.gcp_project_hierarchy.notification_channel_ids
+}
+
+output "service_account_emails" {
+  description = "Service account emails by project key."
+  value       = module.gcp_project_hierarchy.service_account_emails
 }

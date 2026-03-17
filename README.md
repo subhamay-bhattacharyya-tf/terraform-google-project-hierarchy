@@ -28,7 +28,8 @@ Resources provisioned:
 | `google_project_billing_info` | Billing account association |
 | `google_project_service` | API/service enablement |
 | `google_monitoring_notification_channel` | Email alert channel |
-| `google_monitoring_alert_policy` | CPU, error rate, and service usage alerts |
+| `google_billing_budget` | Billing budget alert per project |
+| `google_service_account` | CI/CD service account per project |
 
 ## Requirements
 
@@ -45,7 +46,8 @@ The service account or user running Terraform must have:
 - `resourcemanager.projects.create` (Project Creator)
 - `billing.resourceAssociations.create` (Billing Account User)
 - `serviceusage.services.enable` (Service Usage Admin)
-- `monitoring.alertPolicies.create` (Monitoring AlertPolicy Editor)
+- `billing.budgets.create` (Billing Budget Admin)
+- `iam.serviceAccounts.create` (Service Account Admin)
 
 ## Usage
 
@@ -58,9 +60,7 @@ module "gcp_project_hierarchy" {
   notification_email      = "platform-alerts@example.com"
 
   alert_thresholds = {
-    cpu_utilization = 0.8
-    error_rate      = 0.05
-    service_usage   = 100.0
+    billing_amount = 50
   }
 
   hierarchy_config = jsondecode(file("${path.module}/hierarchy.json"))
@@ -119,9 +119,15 @@ module "gcp_project_hierarchy" {
 
 | Field | Description | Default |
 |---|---|---|
-| `cpu_utilization` | CPU utilization ratio (0.0–1.0) | `0.8` |
-| `error_rate` | Error log entries per second | `0.05` |
-| `service_usage` | API requests per second | `0.9` |
+| `billing_amount` | Billing budget amount in USD | `1` |
+| `threshold_rules` | List of threshold rules (see below) | 25%, 50%, 100% actual + 100% forecasted |
+
+Each `threshold_rules` entry:
+
+| Field | Description | Default |
+|---|---|---|
+| `threshold_percent` | Fraction of budget that triggers the alert (e.g. `0.5` = 50%) | required |
+| `spend_basis` | `"CURRENT_SPEND"` or `"FORECASTED_SPEND"` | `"CURRENT_SPEND"` |
 
 ### `hierarchy_config` Object
 
@@ -137,10 +143,11 @@ module "gcp_project_hierarchy" {
 | `projects[].folder_key` | Key of the parent folder |
 | `projects[].billing_account` | Per-project billing account override |
 | `projects[].notification_email` | Per-project alert email (overrides `var.notification_email`) |
-| `projects[].alert_thresholds` | Per-project threshold overrides (each field falls back to `var.alert_thresholds`) |
+| `projects[].alert_thresholds` | Per-project `billing_amount` and `threshold_rules` overrides (each falls back to `var.alert_thresholds`) |
 | `projects[].services` | List of GCP API URLs to enable |
 | `projects[].labels` | Key-value labels to apply |
-| `projects[].enable_alerts` | Create alert policies in this project |
+| `projects[].enable_alerts` | Create a billing budget alert for this project |
+| `projects[].enable_service_account` | Create a CI/CD service account in this project |
 
 ## Outputs
 
@@ -151,14 +158,16 @@ module "gcp_project_hierarchy" {
 | `project_ids` | Map of project key to GCP project ID |
 | `project_numbers` | Map of project key to GCP project number |
 | `enabled_services` | Map of `project_key/service` to service name |
-| `alert_policy_ids` | Map of project key to list of monitoring alert policy resource names |
+| `billing_budget_ids` | Map of project key to billing budget resource name |
 | `notification_channel_ids` | Map of project key to email notification channel resource name |
+| `service_account_emails` | Map of project key to CI/CD service account email |
 
 ## Notes
 
 - **Folder nesting**: Supports up to 3 levels of folder nesting under the organization. Level classification is based on `parent_type` and `parent_key` in the hierarchy_config.
 - **Billing**: Billing is managed via `google_project_billing_info`, decoupled from project creation. Set `default_billing_account` or per-project `billing_account` in the config.
-- **Monitoring**: Alert policies are created inside each project that has `enable_alerts = true`. The `monitoring.googleapis.com` API must be enabled on any project using alerts.
+- **Service accounts**: Set `enable_service_account = true` on a project to create a `google_service_account` named `SA-<project name>` (account ID: `sa-<project-key>`). Intended for GitHub CI/CD pipelines — add Workload Identity Federation bindings separately.
+- **Billing budgets**: A `google_billing_budget` is created for each project that has `enable_alerts = true` and a billing account assigned. Threshold rules are fully configurable via `alert_thresholds.threshold_rules` in the JSON config, and fall back to module-level defaults (25%, 50%, 100% actual spend + 100% forecasted). GCP notifies billing account IAM members by default; supply `notification_email` to also alert a specific address.
 - **Service enablement**: APIs are enabled after billing association. `disable_on_destroy = false` prevents service disruption during Terraform destroy.
 
 ## License

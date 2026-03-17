@@ -35,18 +35,17 @@ output "enabled_services" {
   value       = { for k, v in google_project_service.this : k => v.service }
 }
 
-output "alert_policy_ids" {
-  description = "Map of project key to list of monitoring alert policy resource names for that project."
-  value = {
-    for k in keys(local.alert_projects) : k => compact([
-      try(google_monitoring_alert_policy.cpu_utilization[k].name, ""),
-      try(google_monitoring_alert_policy.error_rate[k].name, ""),
-      try(google_monitoring_alert_policy.service_usage[k].name, ""),
-    ])
-  }
+output "billing_budget_ids" {
+  description = "Map of project key to billing budget resource name, for alert-enabled projects with a billing account."
+  value       = { for k, v in google_billing_budget.this : k => v.name }
 }
 
 output "notification_channel_ids" {
   description = "Map of project key to email notification channel resource name, for projects that have one configured."
   value       = { for k, v in google_monitoring_notification_channel.email : k => v.name }
+}
+
+output "service_account_emails" {
+  description = "Map of project key to service account email, for projects that have enable_service_account = true."
+  value       = { for k, v in google_service_account.this : k => v.email }
 }

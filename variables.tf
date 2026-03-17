@@ -32,11 +32,18 @@ variable "notification_email" {
 }
 
 variable "alert_thresholds" {
-  description = "Configurable thresholds for monitoring alert policies."
+  description = "Default thresholds for billing budget alert policies. Per-project values in hierarchy_config take precedence."
   type = object({
-    cpu_utilization = optional(number, 0.8)
-    error_rate      = optional(number, 0.05)
-    service_usage   = optional(number, 0.9)
+    billing_amount = optional(number, 1)
+    threshold_rules = optional(list(object({
+      threshold_percent = number
+      spend_basis       = optional(string, "CURRENT_SPEND")
+    })), [
+      { threshold_percent = 0.25, spend_basis = "CURRENT_SPEND" },
+      { threshold_percent = 0.5, spend_basis = "CURRENT_SPEND" },
+      { threshold_percent = 1.0, spend_basis = "CURRENT_SPEND" },
+      { threshold_percent = 1.0, spend_basis = "FORECASTED_SPEND" },
+    ])
   })
   default = {}
 }
@@ -86,14 +93,17 @@ variable "hierarchy_config" {
       billing_account    = optional(string)
       notification_email = optional(string)
       alert_thresholds = optional(object({
-        cpu_utilization = optional(number)
-        error_rate      = optional(number)
-        service_usage   = optional(number)
+        billing_amount = optional(number)
+        threshold_rules = optional(list(object({
+          threshold_percent = number
+          spend_basis       = optional(string, "CURRENT_SPEND")
+        })))
       }))
-      services        = optional(list(string), [])
-      labels          = optional(map(string), {})
-      enable_alerts   = optional(bool, false)
-      deletion_policy = optional(string, "PREVENT")
+      services                = optional(list(string), [])
+      labels                  = optional(map(string), {})
+      enable_alerts           = optional(bool, false)
+      enable_service_account  = optional(bool, false)
+      deletion_policy         = optional(string, "PREVENT")
     })), {})
   })
 }

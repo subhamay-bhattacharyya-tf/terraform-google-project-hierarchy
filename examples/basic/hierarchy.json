@@ -33,6 +33,7 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
+      "enable_service_account": true,
       "deletion_policy": "DELETE"
     },
     "data-warehouse": {
