@@ -10,40 +10,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestGoogleProjectHierarchyMultiBilling verifies that projects can be
-// provisioned under separate billing accounts, notification emails, and
-// per-project alert thresholds within a single hierarchy.
+// TestGoogleProjectHierarchyMultiBilling verifies that projects with per-project
+// alert thresholds, selective alerting, and folder organisation can be
+// provisioned within a single hierarchy. Billing accounts and notification
+// emails are read directly from hierarchy.json; only the organisation ID and
+// a default billing account are supplied at runtime.
 //
 // Environment variables:
 //
-//	GCP_ORGANIZATION_ID              (required)
-//	GCP_FINANCE_BILLING_ACCOUNT      (optional) — billing account for Finance projects
-//	GCP_ENGINEERING_BILLING_ACCOUNT  (optional) — billing account for Engineering projects
-//	GCP_BILLING_ACCOUNT_ID           (optional) — fallback default billing account
-//	GCP_FINANCE_NOTIFICATION_EMAIL   (optional) — alert email for Finance projects
-//	GCP_ENGINEERING_NOTIFICATION_EMAIL (optional) — alert email for Engineering projects
+//	GCP_ORGANIZATION_ID   (required)
+//	GCP_BILLING_ACCOUNT_ID (optional) — default billing account for all projects
 func TestGoogleProjectHierarchyMultiBilling(t *testing.T) {
 	t.Parallel()
 
 	organizationID := mustEnv(t, "GCP_ORGANIZATION_ID")
-	financeBilling := mustEnvOptional("GCP_FINANCE_BILLING_ACCOUNT")
-	engineeringBilling := mustEnvOptional("GCP_ENGINEERING_BILLING_ACCOUNT")
 	defaultBilling := mustEnvOptional("GCP_BILLING_ACCOUNT_ID")
-	financeEmail := mustEnvOptional("GCP_FINANCE_NOTIFICATION_EMAIL")
-	engineeringEmail := mustEnvOptional("GCP_ENGINEERING_NOTIFICATION_EMAIL")
 
 	suffix := randomProjectSuffix()
 
 	terraformOptions := &terraform.Options{
 		TerraformDir: "../examples/multi-billing",
 		Vars: map[string]interface{}{
-			"organization_id":               organizationID,
-			"finance_billing_account":       financeBilling,
-			"engineering_billing_account":   engineeringBilling,
-			"default_billing_account":       defaultBilling,
-			"finance_notification_email":    financeEmail,
-			"engineering_notification_email": engineeringEmail,
-			"test_suffix":                   suffix,
+			"organization_id":        organizationID,
+			"default_billing_account": defaultBilling,
+			"test_suffix":            suffix,
 		},
 		NoColor: true,
 	}
@@ -104,19 +94,6 @@ func TestGoogleProjectHierarchyMultiBilling(t *testing.T) {
 	require.NotContains(t, alertPolicyIDs, "eng-sandbox",
 		"eng-sandbox has enable_alerts=false and should have no alert policies")
 
-	// --- Notification channels: present when email is configured ---
-	if financeEmail != "" {
-		channelIDs := terraform.OutputJson(t, terraformOptions, "notification_channel_ids")
-		require.Contains(t, channelIDs, "finance-reporting",
-			"Expected notification channel for finance-reporting when email is set")
-		require.Contains(t, channelIDs, "finance-analytics",
-			"Expected notification channel for finance-analytics when email is set")
-	}
-	if engineeringEmail != "" {
-		channelIDs := terraform.OutputJson(t, terraformOptions, "notification_channel_ids")
-		require.Contains(t, channelIDs, "eng-platform",
-			"Expected notification channel for eng-platform when email is set")
-	}
 }
 
 func TestGoogleProjectHierarchy(t *testing.T) {

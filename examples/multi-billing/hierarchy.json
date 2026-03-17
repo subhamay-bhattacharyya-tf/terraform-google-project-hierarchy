@@ -14,8 +14,6 @@
       "name": "Finance Reporting",
       "project_id": "prj-finance-reporting",
       "folder_key": "finance",
-      "billing_account": "FINANCE-BILLING-ACCT",
-      "notification_email": "FINANCE-ALERT-EMAIL",
       "alert_thresholds": {
         "cpu_utilization": 0.75,
         "error_rate": 0.02,
@@ -39,8 +37,6 @@
       "name": "Finance Analytics",
       "project_id": "prj-finance-analytics",
       "folder_key": "finance",
-      "billing_account": "FINANCE-BILLING-ACCT",
-      "notification_email": "FINANCE-ALERT-EMAIL",
       "alert_thresholds": {
         "cpu_utilization": 0.85,
         "error_rate": 0.05,
@@ -65,8 +61,6 @@
       "name": "Engineering Platform",
       "project_id": "prj-eng-platform",
       "folder_key": "engineering",
-      "billing_account": "ENGINEERING-BILLING-ACCT",
-      "notification_email": "ENGINEERING-ALERT-EMAIL",
       "alert_thresholds": {
         "cpu_utilization": 0.9,
         "error_rate": 0.1,

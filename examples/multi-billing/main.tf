@@ -1,35 +1,27 @@
 # ============================================================================
-# examples/multi-billing - Multi-Billing, Multi-Threshold, Multi-Notification
-#                          GCP Project Hierarchy Example
+# examples/multi-billing - Multi-Threshold, Per-Team Alert Policy Example
 # ============================================================================
 #
-# This example demonstrates three per-project overrides within a single
-# hierarchy:
+# This example demonstrates per-project overrides within a single hierarchy:
 #
-#   1. Billing accounts  — Finance and Engineering projects use separate
-#                          billing accounts; eng-sandbox falls back to the
-#                          module-level default.
-#
-#   2. Notification emails — Finance projects alert to a Finance ops mailbox;
-#                            Engineering projects alert to an Engineering ops
-#                            mailbox. eng-sandbox has no alerts.
-#
-#   3. Alert thresholds  — Each production project defines its own CPU,
+#   1. Alert thresholds  — Each production project defines its own CPU,
 #                          error-rate, and service-usage thresholds tuned to
 #                          its workload characteristics.
 #
-# Billing account IDs and alert email addresses are kept out of hierarchy.json
-# using placeholder strings that are substituted at plan time via a locals
-# merge. This prevents secrets from being committed to source control.
+#   2. Selective alerting — eng-sandbox has enable_alerts=false and therefore
+#                           receives no monitoring alert policies.
+#
+#   3. Folder organisation — Finance and Engineering projects are grouped into
+#                            their own top-level folders under the organisation.
+#
+# All projects share a single billing account supplied via default_billing_account.
+# Per-project billing account overrides can be added directly to hierarchy.json.
 #
 # Usage:
 #   terraform init
 #   terraform plan \
 #     -var organization_id=<YOUR_ORG_ID> \
-#     -var finance_billing_account=<FINANCE_BILLING_ID> \
-#     -var engineering_billing_account=<ENGINEERING_BILLING_ID> \
-#     -var finance_notification_email=<FINANCE_OPS_EMAIL> \
-#     -var engineering_notification_email=<ENGINEERING_OPS_EMAIL>
+#     -var default_billing_account=<BILLING_ID>
 #   terraform apply ...
 # ============================================================================
 
@@ -45,25 +37,9 @@ locals {
     }
     projects = {
       for k, v in local.base_config.projects :
-      k => merge(
-        v,
-        # Suffix project IDs for uniqueness across test runs.
-        var.test_suffix == "" ? {} : { project_id = "${v.project_id}-${var.test_suffix}" },
-        # Replace billing account placeholders with runtime variable values.
-        try(v.billing_account, "") == "FINANCE-BILLING-ACCT" ? {
-          billing_account = var.finance_billing_account
-        } : {},
-        try(v.billing_account, "") == "ENGINEERING-BILLING-ACCT" ? {
-          billing_account = var.engineering_billing_account
-        } : {},
-        # Replace notification email placeholders with runtime variable values.
-        try(v.notification_email, "") == "FINANCE-ALERT-EMAIL" ? {
-          notification_email = var.finance_notification_email
-        } : {},
-        try(v.notification_email, "") == "ENGINEERING-ALERT-EMAIL" ? {
-          notification_email = var.engineering_notification_email
-        } : {},
-      )
+      k => var.test_suffix == "" ? v : merge(v, {
+        project_id = "${v.project_id}-${var.test_suffix}"
+      })
     }
   })
 }
@@ -87,34 +63,10 @@ variable "organization_id" {
   type        = string
 }
 
-variable "finance_billing_account" {
-  description = "Billing account ID assigned to Finance projects."
-  type        = string
-  default     = null
-}
-
-variable "engineering_billing_account" {
-  description = "Billing account ID assigned to Engineering projects."
-  type        = string
-  default     = null
-}
-
 variable "default_billing_account" {
-  description = "Fallback billing account ID for projects with no explicit billing_account set."
+  description = "Billing account ID applied to all projects in this hierarchy."
   type        = string
   default     = null
-}
-
-variable "finance_notification_email" {
-  description = "Alert notification email address for Finance projects."
-  type        = string
-  default     = ""
-}
-
-variable "engineering_notification_email" {
-  description = "Alert notification email address for Engineering projects."
-  type        = string
-  default     = ""
 }
 
 variable "test_suffix" {
