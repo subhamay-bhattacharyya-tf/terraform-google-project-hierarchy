@@ -83,16 +83,16 @@ func TestGoogleProjectHierarchyMultiBilling(t *testing.T) {
 	assertServiceEnabled(t, enabledServices, "eng-platform", "monitoring.googleapis.com")
 	assertServiceEnabled(t, enabledServices, "eng-sandbox", "iam.googleapis.com")
 
-	// --- Alert policies: present for alert-enabled projects, absent for eng-sandbox ---
-	alertPolicyIDs := terraform.OutputJson(t, terraformOptions, "alert_policy_ids")
-	require.Contains(t, alertPolicyIDs, "finance-reporting",
-		"Expected alert policies for finance-reporting")
-	require.Contains(t, alertPolicyIDs, "finance-analytics",
-		"Expected alert policies for finance-analytics")
-	require.Contains(t, alertPolicyIDs, "eng-platform",
-		"Expected alert policies for eng-platform")
-	require.NotContains(t, alertPolicyIDs, "eng-sandbox",
-		"eng-sandbox has enable_alerts=false and should have no alert policies")
+	// --- Billing budgets: present for alert-enabled projects, absent for eng-sandbox ---
+	billingBudgetIDs := terraform.OutputJson(t, terraformOptions, "billing_budget_ids")
+	require.Contains(t, billingBudgetIDs, "finance-reporting",
+		"Expected billing budget for finance-reporting")
+	require.Contains(t, billingBudgetIDs, "finance-analytics",
+		"Expected billing budget for finance-analytics")
+	require.Contains(t, billingBudgetIDs, "eng-platform",
+		"Expected billing budget for eng-platform")
+	require.NotContains(t, billingBudgetIDs, "eng-sandbox",
+		"eng-sandbox has enable_alerts=false and should have no billing budget")
 
 }
 
