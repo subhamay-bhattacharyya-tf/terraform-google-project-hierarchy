@@ -17,7 +17,7 @@ locals {
   # Per-project override takes precedence over the module-level default.
   alert_project_emails = {
     for k, v in local.alert_projects :
-    k => coalesce(try(v.notification_email, null), var.notification_email, "")
+    k => try(coalesce(try(v.notification_email, null), var.notification_email), "")
   }
 }
 
