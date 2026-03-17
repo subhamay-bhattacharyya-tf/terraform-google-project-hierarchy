@@ -9,6 +9,7 @@
 - Use try function to safely resolve monitoring project ID
 - Add deletion_policy to projects and update hierarchy configuration for unique project IDs
 - Enhance hierarchy configuration to include test_suffix for folder display names
+- Implement billing account association via google_billing_project_info and update dependencies
 
 ### 🐛 Bug Fixes
 
@@ -29,6 +30,11 @@
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
+- Update CHANGELOG.md [skip ci]
+
+### 🎨 Styling
+
+- Format alignment of project resource attributes for consistency
 
 ### ⚙️ Miscellaneous Tasks
 
