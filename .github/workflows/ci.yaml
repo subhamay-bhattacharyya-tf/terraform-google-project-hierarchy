@@ -127,7 +127,7 @@ jobs:
         id: test-basic
         run: |
           set -o pipefail
-          go test -v -timeout 30m -run TestGoogleProjectHierarchy \
+          go test -v -timeout 30m -run ^TestGoogleProjectHierarchy$ \
             ./google_project_hierarchy_test.go ./helpers_test.go 2>&1 | tee test_basic_output.txt
           echo "## Basic Test Results" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
