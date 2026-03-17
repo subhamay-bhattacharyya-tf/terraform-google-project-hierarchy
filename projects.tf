@@ -15,9 +15,9 @@ locals {
 resource "google_project" "this" {
   for_each = local.projects
 
-  name            = each.value.name
-  project_id      = each.value.project_id
-  folder_id       = local.all_folder_names[each.value.folder_key]
+  name       = each.value.name
+  project_id = each.value.project_id
+  folder_id  = local.all_folder_names[each.value.folder_key]
 
   labels          = try(each.value.labels, {})
   deletion_policy = try(each.value.deletion_policy, "PREVENT")
