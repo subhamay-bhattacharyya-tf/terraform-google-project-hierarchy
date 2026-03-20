@@ -26,6 +26,7 @@
 - Remove unnecessary whitespace in billing account checks
 - Improve billing account handling using coalesce and try functions
 - Add condition to run Terratest on main branch or workflow dispatch
+- Update CI workflow to include changes in ci.yaml and adjust Terratest conditions
 
 ### 🚜 Refactor
 
@@ -34,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
