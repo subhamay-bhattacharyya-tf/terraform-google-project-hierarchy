@@ -13,6 +13,7 @@
 - Enhance GCP Project Hierarchy Module with Multi-Billing and Alert Customization
 - Add multi-billing test case to Terratest workflow
 - Implement billing budget alerts and service accounts for GCP projects
+- Add billing account to existing projects and create org_quotas.csv file
 
 ### 🐛 Bug Fixes
 
@@ -33,6 +34,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
