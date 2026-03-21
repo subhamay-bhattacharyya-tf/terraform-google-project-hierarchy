@@ -14,6 +14,7 @@
 - Add multi-billing test case to Terratest workflow
 - Implement billing budget alerts and service accounts for GCP projects
 - Add billing account to existing projects and create org_quotas.csv file
+- Update billing accounts in hierarchy.json files and adjust CI workflow paths
 
 ### 🐛 Bug Fixes
 
@@ -35,6 +36,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
