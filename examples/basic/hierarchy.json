@@ -20,6 +20,7 @@
       "name": "GitHub CICD",
       "project_id": "prj-shared-github-cicd",
       "folder_key": "platform",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
       "notification_email": "platform-alerts@example.com",
       "services": [
         "iam.googleapis.com",
@@ -40,6 +41,7 @@
       "name": "Data Warehouse",
       "project_id": "prj-shared-data-warehouse",
       "folder_key": "data",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
       "services": [
         "bigquery.googleapis.com",
         "storage.googleapis.com",

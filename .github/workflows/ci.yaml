@@ -12,6 +12,7 @@ on:
       - 'examples/**'
       - 'test/**'
       - '.github/workflows/ci.yaml'
+      - 'examples/**'
   pull_request:
     branches: [main]
     paths:

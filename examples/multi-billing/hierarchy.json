@@ -14,7 +14,7 @@
       "name": "Finance Reporting",
       "project_id": "prj-finance-reporting",
       "folder_key": "finance",
-      "billing_account": "015898-2F7763-830474",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
       "alert_thresholds": {
         "billing_amount": 200,
         "threshold_rules": [
@@ -37,6 +37,33 @@
       },
       "enable_alerts": true,
       "enable_service_account": true,
+      "deletion_policy": "DELETE"
+    },
+    "finance-analytics": {
+      "name": "Finance Analytics",
+      "project_id": "prj-finance-analytics",
+      "folder_key": "finance",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
+      "alert_thresholds": {
+        "billing_amount": 150,
+        "threshold_rules": [
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" }
+        ]
+      },
+      "services": [
+        "storage.googleapis.com",
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "finance",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "enable_service_account": false,
       "deletion_policy": "DELETE"
     },
     "eng-platform": {
@@ -66,6 +93,23 @@
       },
       "enable_alerts": true,
       "enable_service_account": true,
+      "deletion_policy": "DELETE"
+    },
+    "eng-sandbox": {
+      "name": "Engineering Sandbox",
+      "project_id": "prj-eng-sandbox",
+      "folder_key": "engineering",
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com"
+      ],
+      "labels": {
+        "env": "dev",
+        "team": "engineering",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": false,
+      "enable_service_account": false,
       "deletion_policy": "DELETE"
     }
   }
