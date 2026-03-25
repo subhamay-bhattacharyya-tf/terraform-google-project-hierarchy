@@ -105,9 +105,9 @@ variable "hierarchy_config" {
           spend_basis       = optional(string, "CURRENT_SPEND")
         })))
       }))
-      services        = optional(list(string), [])
-      labels          = optional(map(string), {})
-      enable_alerts   = optional(bool, false)
+      services      = optional(list(string), [])
+      labels        = optional(map(string), {})
+      enable_alerts = optional(bool, false)
       service_account = optional(object({
         enabled       = optional(bool, false)
         account_id    = optional(string)
