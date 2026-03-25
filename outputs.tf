@@ -46,6 +46,6 @@ output "notification_channel_ids" {
 }
 
 output "service_account_emails" {
-  description = "Map of project key to service account email, for projects that have enable_service_account = true."
+  description = "Map of project key to service account email, for projects that have service_account.enabled = true."
   value       = { for k, v in google_service_account.this : k => v.email }
 }

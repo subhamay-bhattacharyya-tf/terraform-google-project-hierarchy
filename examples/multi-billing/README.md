@@ -63,7 +63,7 @@ Both `billing_amount` and `threshold_rules` fall back individually to `var.alert
 | `google_project_service` | BigQuery, Storage, IAM, CRM, Service Usage, Monitoring APIs per project |
 | `google_monitoring_notification_channel` | One email channel per alert-enabled project (when email is set) |
 | `google_billing_budget` | Billing budget alert per alert-enabled project with a billing account |
-| `google_service_account` | CI/CD service account per project with `enable_service_account = true` |
+| `google_service_account` | CI/CD service account per project with `service_account.enabled = true` |
 
 ## Usage
 
@@ -297,6 +297,6 @@ To add a new department:
 
 - **Secrets**: Never commit billing account IDs or email addresses to source control. Use `terraform.tfvars` (gitignored) or environment variables (`TF_VAR_finance_billing_account`) to supply them at runtime.
 - **Partial threshold overrides**: Both `alert_thresholds.billing_amount` and `alert_thresholds.threshold_rules` are individually optional per project. If omitted, each falls back to the module-level `var.alert_thresholds` defaults (`billing_amount`: $1, `threshold_rules`: 25%/50%/100% actual + 100% forecasted).
-- **No alerts on sandbox**: `eng-sandbox` sets `"enable_alerts": false` and `"enable_service_account": false` — no billing budget, notification channel, or service account is created for it.
-- **Service accounts**: Each production project sets `"enable_service_account": true`, creating a `google_service_account` named `SA-<project name>` (account ID `sa-<project-key>`). Use the `service_account_emails` output to wire these into your GitHub CI/CD pipelines.
+- **No alerts on sandbox**: `eng-sandbox` sets `"enable_alerts": false` and `"service_account": { "enabled": false }` — no billing budget, notification channel, or service account is created for it.
+- **Service accounts**: Each production project sets `"service_account": { "enabled": true, ... }`, creating a `google_service_account` with the specified `account_id`, `display_name`, and `project_roles` IAM bindings. Use the `service_account_emails` output to wire these into your GitHub CI/CD pipelines.
 - **Destruction**: All projects use `deletion_policy = "DELETE"` to allow `terraform destroy` to complete without manual intervention. For production, omit this field or set it to `"PREVENT"`.

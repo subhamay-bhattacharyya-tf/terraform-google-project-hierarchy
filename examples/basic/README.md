@@ -168,7 +168,7 @@ Edit `hierarchy.json` to add folders and projects. The module resolves parent re
 ## Notes
 
 - **Billing**: Both projects inherit `billing_account` from the module-level `default_billing_account`. To override per project, add a `"billing_account"` field to the project entry in `hierarchy.json`. See the [multi-billing example](../multi-billing/) for a full demonstration.
-- **Service accounts**: Set `"enable_service_account": true` on a project to create a service account named `SA-<project name>` (account ID `sa-<project-key>`). Intended for GitHub CI/CD pipelines.
+- **Service accounts**: Set `"service_account": { "enabled": true, "account_id": "...", "display_name": "...", "project_roles": [...] }` on a project to create a service account and bind the specified IAM roles to it on the project.
 - **Billing budgets**: A billing budget is created for each project with `"enable_alerts": true` and a billing account assigned. Threshold rules are configurable per project via `alert_thresholds.threshold_rules` in the JSON config; if omitted, they default to 25%, 50%, 100% actual spend + 100% forecasted. GCP notifies billing account IAM members automatically; set `notification_email` to also route alerts to a specific address.
 - **Project IDs**: GCP project IDs are globally unique and cannot be reused after deletion for 30 days. The `test_suffix` variable is used by automated tests to avoid conflicts across runs.
 - **Destruction**: Both projects use `deletion_policy = "DELETE"` so `terraform destroy` can remove them without manual intervention. For production use, omit this field or set it to `"PREVENT"`.

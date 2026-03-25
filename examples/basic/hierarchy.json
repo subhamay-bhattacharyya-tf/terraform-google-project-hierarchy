@@ -34,7 +34,15 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
-      "enable_service_account": true,
+      "service_account": {
+        "enabled": true,
+        "account_id": "sa-github-cicd",
+        "display_name": "SA for GitHub CICD",
+        "project_roles": [
+          "roles/iam.workloadIdentityUser",
+          "roles/resourcemanager.projectIamAdmin"
+        ]
+      },
       "deletion_policy": "DELETE"
     },
     "data-warehouse": {

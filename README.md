@@ -147,7 +147,7 @@ Each `threshold_rules` entry:
 | `projects[].services` | List of GCP API URLs to enable |
 | `projects[].labels` | Key-value labels to apply |
 | `projects[].enable_alerts` | Create a billing budget alert for this project |
-| `projects[].enable_service_account` | Create a CI/CD service account in this project |
+| `projects[].service_account` | Object to configure a CI/CD service account (`enabled`, `account_id`, `display_name`, `project_roles`) |
 
 ## Outputs
 
@@ -166,7 +166,7 @@ Each `threshold_rules` entry:
 
 - **Folder nesting**: Supports up to 3 levels of folder nesting under the organization. Level classification is based on `parent_type` and `parent_key` in the hierarchy_config.
 - **Billing**: Billing is managed via `google_project_billing_info`, decoupled from project creation. Set `default_billing_account` or per-project `billing_account` in the config.
-- **Service accounts**: Set `enable_service_account = true` on a project to create a `google_service_account` named `SA-<project name>` (account ID: `sa-<project-key>`). Intended for GitHub CI/CD pipelines — add Workload Identity Federation bindings separately.
+- **Service accounts**: Set `service_account.enabled = true` on a project to create a `google_service_account`. Use `account_id` and `display_name` to customise the SA identity, and `project_roles` to bind IAM roles on the project automatically. Falls back to `sa-<project-key>` / `SA-<project name>` if not specified.
 - **Billing budgets**: A `google_billing_budget` is created for each project that has `enable_alerts = true` and a billing account assigned. Threshold rules are fully configurable via `alert_thresholds.threshold_rules` in the JSON config, and fall back to module-level defaults (25%, 50%, 100% actual spend + 100% forecasted). GCP notifies billing account IAM members by default; supply `notification_email` to also alert a specific address.
 - **Service enablement**: APIs are enabled after billing association. `disable_on_destroy = false` prevents service disruption during Terraform destroy.
 

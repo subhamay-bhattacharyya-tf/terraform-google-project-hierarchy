@@ -36,7 +36,15 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
-      "enable_service_account": true,
+      "service_account": {
+        "enabled": true,
+        "account_id": "sa-finance-reporting",
+        "display_name": "SA for Finance Reporting",
+        "project_roles": [
+          "roles/bigquery.admin",
+          "roles/iam.workloadIdentityUser"
+        ]
+      },
       "deletion_policy": "DELETE"
     },
     "finance-analytics": {
@@ -63,7 +71,9 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
-      "enable_service_account": false,
+      "service_account": {
+        "enabled": false
+      },
       "deletion_policy": "DELETE"
     },
     "eng-platform": {
@@ -92,7 +102,15 @@
         "managed-by": "terraform"
       },
       "enable_alerts": true,
-      "enable_service_account": true,
+      "service_account": {
+        "enabled": true,
+        "account_id": "sa-eng-platform",
+        "display_name": "SA for Engineering Platform",
+        "project_roles": [
+          "roles/iam.workloadIdentityUser",
+          "roles/serviceusage.serviceUsageAdmin"
+        ]
+      },
       "deletion_policy": "DELETE"
     },
     "eng-sandbox": {
@@ -109,7 +127,9 @@
         "managed-by": "terraform"
       },
       "enable_alerts": false,
-      "enable_service_account": false,
+      "service_account": {
+        "enabled": false
+      },
       "deletion_policy": "DELETE"
     }
   }

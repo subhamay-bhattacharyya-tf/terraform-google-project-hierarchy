@@ -45,7 +45,8 @@ install-tools.log
 node_modules/
 
 
-
+# Hierarchy.json
+hierarchy.json
 
 ## Ignore log files
 gh-log.txt

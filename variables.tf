@@ -75,7 +75,13 @@ variable "hierarchy_config" {
           "billing_account": null,
           "services": ["iam.googleapis.com", "cloudresourcemanager.googleapis.com"],
           "labels": { "env": "shared" },
-          "enable_alerts": true
+          "enable_alerts": true,
+          "service_account": {
+            "enabled": true,
+            "account_id": "sa-github-cicd",
+            "display_name": "SA for GitHub CICD",
+            "project_roles": ["roles/iam.workloadIdentityUser"]
+          }
         }
       },
     }
@@ -99,11 +105,16 @@ variable "hierarchy_config" {
           spend_basis       = optional(string, "CURRENT_SPEND")
         })))
       }))
-      services               = optional(list(string), [])
-      labels                 = optional(map(string), {})
-      enable_alerts          = optional(bool, false)
-      enable_service_account = optional(bool, false)
-      deletion_policy        = optional(string, "PREVENT")
+      services        = optional(list(string), [])
+      labels          = optional(map(string), {})
+      enable_alerts   = optional(bool, false)
+      service_account = optional(object({
+        enabled       = optional(bool, false)
+        account_id    = optional(string)
+        display_name  = optional(string)
+        project_roles = optional(list(string), [])
+      }))
+      deletion_policy = optional(string, "PREVENT")
     })), {})
   })
 }
