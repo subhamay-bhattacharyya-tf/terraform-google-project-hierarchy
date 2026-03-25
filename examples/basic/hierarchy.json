@@ -1,0 +1,68 @@
+{
+  "folders": {
+    "shared": {
+      "display_name": "Shared",
+      "parent_type": "organization"
+    },
+    "platform": {
+      "display_name": "Platform",
+      "parent_type": "folder",
+      "parent_key": "shared"
+    },
+    "data": {
+      "display_name": "Data",
+      "parent_type": "folder",
+      "parent_key": "shared"
+    }
+  },
+  "projects": {
+    "github-cicd": {
+      "name": "GitHub CICD",
+      "project_id": "prj-shared-github-cicd",
+      "folder_key": "platform",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
+      "notification_email": "platform-alerts@example.com",
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "serviceusage.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "shared",
+        "team": "platform",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "service_account": {
+        "enabled": true,
+        "account_id": "sa-github-cicd",
+        "display_name": "SA for GitHub CICD",
+        "project_roles": [
+          "roles/iam.workloadIdentityUser",
+          "roles/resourcemanager.projectIamAdmin"
+        ]
+      },
+      "deletion_policy": "DELETE"
+    },
+    "data-warehouse": {
+      "name": "Data Warehouse",
+      "project_id": "prj-shared-data-warehouse",
+      "folder_key": "data",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
+      "services": [
+        "bigquery.googleapis.com",
+        "storage.googleapis.com",
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com"
+      ],
+      "labels": {
+        "env": "shared",
+        "team": "data",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": false,
+      "deletion_policy": "DELETE"
+    }
+  }
+}

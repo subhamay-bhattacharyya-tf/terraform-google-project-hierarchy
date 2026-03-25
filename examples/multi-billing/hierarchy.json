@@ -1,0 +1,136 @@
+{
+  "folders": {
+    "finance": {
+      "display_name": "Finance",
+      "parent_type": "organization"
+    },
+    "engineering": {
+      "display_name": "Engineering",
+      "parent_type": "organization"
+    }
+  },
+  "projects": {
+    "finance-reporting": {
+      "name": "Finance Reporting",
+      "project_id": "prj-finance-reporting",
+      "folder_key": "finance",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
+      "alert_thresholds": {
+        "billing_amount": 200,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
+      },
+      "services": [
+        "bigquery.googleapis.com",
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "finance",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "service_account": {
+        "enabled": true,
+        "account_id": "sa-finance-reporting",
+        "display_name": "SA for Finance Reporting",
+        "project_roles": [
+          "roles/bigquery.admin",
+          "roles/iam.workloadIdentityUser"
+        ]
+      },
+      "deletion_policy": "DELETE"
+    },
+    "finance-analytics": {
+      "name": "Finance Analytics",
+      "project_id": "prj-finance-analytics",
+      "folder_key": "finance",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
+      "alert_thresholds": {
+        "billing_amount": 150,
+        "threshold_rules": [
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" }
+        ]
+      },
+      "services": [
+        "storage.googleapis.com",
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "finance",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "service_account": {
+        "enabled": false
+      },
+      "deletion_policy": "DELETE"
+    },
+    "eng-platform": {
+      "name": "Engineering Platform",
+      "project_id": "prj-eng-platform",
+      "folder_key": "engineering",
+      "billing_account": "010DEB-AF68D5-B8B7FE",
+      "alert_thresholds": {
+        "billing_amount": 300,
+        "threshold_rules": [
+          { "threshold_percent": 0.25, "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 0.5,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "CURRENT_SPEND" },
+          { "threshold_percent": 1.0,  "spend_basis": "FORECASTED_SPEND" }
+        ]
+      },
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "serviceusage.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "prod",
+        "team": "engineering",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true,
+      "service_account": {
+        "enabled": true,
+        "account_id": "sa-eng-platform",
+        "display_name": "SA for Engineering Platform",
+        "project_roles": [
+          "roles/iam.workloadIdentityUser",
+          "roles/serviceusage.serviceUsageAdmin"
+        ]
+      },
+      "deletion_policy": "DELETE"
+    },
+    "eng-sandbox": {
+      "name": "Engineering Sandbox",
+      "project_id": "prj-eng-sandbox",
+      "folder_key": "engineering",
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com"
+      ],
+      "labels": {
+        "env": "dev",
+        "team": "engineering",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": false,
+      "service_account": {
+        "enabled": false
+      },
+      "deletion_policy": "DELETE"
+    }
+  }
+}

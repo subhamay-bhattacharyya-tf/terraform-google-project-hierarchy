@@ -1,424 +1,175 @@
-# Terraform AWS S3 Bucket Module
+# Terraform Module for GCP Folder and Project Hierarchy Management
 
-![Release](https://github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/actions/workflows/ci.yaml/badge.svg)&nbsp;![AWS](https://img.shields.io/badge/AWS-232F3E?logo=amazonaws&logoColor=white)&nbsp;![Commit Activity](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![File Count](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![Top Language](https://img.shields.io/github/languages/top/subhamay-bhattacharyya-tf/terraform-aws-s3)&nbsp;![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/dd8a07e256e7af69c3de7f120a895d97/raw/terraform-aws-s3.json?)
+![Release](https://github.com/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy/actions/workflows/ci.yaml/badge.svg)&nbsp;![GCP](https://img.shields.io/badge/GCP-4285F4?logo=googlecloud&logoColor=white)&nbsp;![Commit Activity](https://img.shields.io/github/commit-activity/t/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![Last Commit](https://img.shields.io/github/last-commit/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![Release Date](https://img.shields.io/github/release-date/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![Repo Size](https://img.shields.io/github/repo-size/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![File Count](https://img.shields.io/github/directory-file-count/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![Issues](https://img.shields.io/github/issues/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![Top Language](https://img.shields.io/github/languages/top/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy)&nbsp;![Custom Endpoint](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/bsubhamay/2943614c1b23ed2953571e8a7143a406/raw/terraform-google-project-hierarchy.json?)&nbsp;![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-623CE4?logo=anthropic&logoColor=white)
 
-A Terraform module for creating and managing AWS S3 buckets with optional encryption (SSE-S3 or SSE-KMS), versioning, folder structure, bucket policy, and event notifications.
+A Terraform module for creating and managing **Google Cloud Platform (GCP) folder and project hierarchies** using a JSON-driven configuration model.
 
-## Features
+## Overview
 
-- JSON-style configuration input
-- Server-side encryption with SSE-S3 (AES256) or SSE-KMS
-- Configurable versioning
-- Automatic folder/prefix creation
-- Public access blocked by default
-- Optional bucket policy
-- Event notifications for SQS, SNS, and Lambda
-- Built-in input validation
+This module enables platform engineering teams to provision entire GCP organizational structures — including multi-level folder hierarchies, projects, billing associations, API enablement, and monitoring alerts — from a single structured JSON configuration file.
 
-## Modules
+## Architecture
 
-| Module | Description |
-|--------|-------------|
-| [bucket](modules/bucket) | S3 bucket with encryption, versioning, and folders |
-| [event-notification](modules/event-notification) | S3 event notifications for SQS, SNS, and Lambda |
-
-## Usage
-
-### Basic S3 Bucket
-
-```hcl
-module "s3_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/bucket?ref=main"
-
-  s3_config = {
-    bucket_name = "my-bucket"
-  }
-}
+```
+Organization
+└── Shared (L0 folder)
+    ├── Platform (L1 folder)
+    │   └── github-cicd (project)
+    └── Data (L1 folder)
+        └── data-warehouse (project)
 ```
 
-### S3 Bucket with Versioning
+Resources provisioned:
 
-```hcl
-module "s3_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/bucket?ref=main"
-
-  s3_config = {
-    bucket_name = "my-versioned-bucket"
-    versioning  = true
-  }
-}
-```
-
-### S3 Bucket with SSE-S3 Encryption
-
-```hcl
-module "s3_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/bucket?ref=main"
-
-  s3_config = {
-    bucket_name   = "my-encrypted-bucket"
-    sse_algorithm = "AES256"
-  }
-}
-```
-
-### S3 Bucket with SSE-KMS Encryption
-
-```hcl
-module "s3_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/bucket?ref=main"
-
-  s3_config = {
-    bucket_name   = "my-kms-bucket"
-    sse_algorithm = "aws:kms"
-    kms_key_alias = "my-kms-key"
-  }
-}
-```
-
-### S3 Bucket with Folders
-
-```hcl
-module "s3_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/bucket?ref=main"
-
-  s3_config = {
-    bucket_name = "my-data-bucket"
-    bucket_keys = ["raw-data/csv", "raw-data/json", "processed"]
-  }
-}
-```
-
-### S3 Bucket with Bucket Policy
-
-```hcl
-module "s3_bucket" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/bucket?ref=main"
-
-  s3_config = {
-    bucket_name   = "my-policy-bucket"
-    bucket_policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid       = "AllowSSLRequestsOnly"
-          Effect    = "Deny"
-          Principal = "*"
-          Action    = "s3:*"
-          Resource = [
-            "arn:aws:s3:::my-policy-bucket",
-            "arn:aws:s3:::my-policy-bucket/*"
-          ]
-          Condition = {
-            Bool = {
-              "aws:SecureTransport" = "false"
-            }
-          }
-        }
-      ]
-    })
-  }
-}
-```
-
-### S3 Event Notification with SQS
-
-```hcl
-module "s3_notification" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/event-notification?ref=main"
-
-  bucket_name = "my-bucket"
-
-  sqs_notifications = [
-    {
-      id            = "snowpipe-notification"
-      queue_arn     = "arn:aws:sqs:us-east-1:123456789012:my-queue"
-      events        = ["s3:ObjectCreated:*"]
-      filter_prefix = "raw-data/"
-      filter_suffix = ".csv"
-    }
-  ]
-}
-```
-
-### S3 Event Notification with SNS
-
-```hcl
-module "s3_notification" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/event-notification?ref=main"
-
-  bucket_name = "my-bucket"
-
-  sns_notifications = [
-    {
-      id            = "upload-notification"
-      topic_arn     = "arn:aws:sns:us-east-1:123456789012:my-topic"
-      events        = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
-      filter_prefix = "uploads/"
-    }
-  ]
-}
-```
-
-### S3 Event Notification with Lambda
-
-```hcl
-module "s3_notification" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/event-notification?ref=main"
-
-  bucket_name = "my-bucket"
-
-  lambda_notifications = [
-    {
-      id                  = "process-uploads"
-      lambda_function_arn = "arn:aws:lambda:us-east-1:123456789012:function:my-function"
-      events              = ["s3:ObjectCreated:*"]
-      filter_suffix       = ".json"
-    }
-  ]
-}
-```
-
-### S3 Event Notification with Multiple Targets
-
-```hcl
-module "s3_notification" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-aws-s3/modules/event-notification?ref=main"
-
-  bucket_name = "my-bucket"
-
-  sqs_notifications = [
-    {
-      id        = "queue-notification"
-      queue_arn = "arn:aws:sqs:us-east-1:123456789012:my-queue"
-      events    = ["s3:ObjectCreated:*"]
-    }
-  ]
-
-  sns_notifications = [
-    {
-      id        = "topic-notification"
-      topic_arn = "arn:aws:sns:us-east-1:123456789012:my-topic"
-      events    = ["s3:ObjectRemoved:*"]
-    }
-  ]
-
-  lambda_notifications = [
-    {
-      id                  = "lambda-notification"
-      lambda_function_arn = "arn:aws:lambda:us-east-1:123456789012:function:my-function"
-      events              = ["s3:ObjectCreated:Put"]
-      filter_prefix       = "processed/"
-    }
-  ]
-}
-```
-
-### Using JSON Input
-
-```bash
-terraform apply -var='region=us-east-1' -var='s3={"bucket_name":"my-bucket","bucket_keys":["raw-data/csv","raw-data/json"],"versioning":true,"sse_algorithm":"aws:kms","kms_key_alias":"SB-KMS"}'
-```
-
-## Examples
-
-### Bucket Examples
-
-| Example | Description |
-|---------|-------------|
-| [basic](examples/bucket/basic) | Simple S3 bucket |
-| [versioning](examples/bucket/versioning) | S3 bucket with versioning enabled |
-| [sse-s3](examples/bucket/sse-s3) | S3 bucket with SSE-S3 encryption |
-| [sse-kms](examples/bucket/sse-kms) | S3 bucket with SSE-KMS encryption |
-| [folders](examples/bucket/folders) | S3 bucket with folder structure |
-
-### Event Notification Examples
-
-| Example | Description |
-|---------|-------------|
-| [sqs](examples/event-notification/sqs) | S3 event notification to SQS |
-| [sns](examples/event-notification/sns) | S3 event notification to SNS |
-| [lambda](examples/event-notification/lambda) | S3 event notification to Lambda |
+| Resource | Description |
+|---|---|
+| `google_folder` | Multi-level folder hierarchy (up to 3 levels) |
+| `google_project` | Projects placed within folders |
+| `google_project_billing_info` | Billing account association |
+| `google_project_service` | API/service enablement |
+| `google_monitoring_notification_channel` | Email alert channel |
+| `google_billing_budget` | Billing budget alert per project |
+| `google_service_account` | CI/CD service account per project |
 
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| terraform | >= 1.3.0 |
-| aws | >= 5.0.0 |
+| Requirement | Version |
+|---|---|
+| Terraform | >= 1.3.0 |
+| Google Provider | >= 7.23.0 |
 
-## Providers
+### Required IAM Permissions
 
-| Name | Version |
-|------|---------|
-| aws | >= 5.0.0 |
+The service account or user running Terraform must have:
 
-## Inputs
+- `resourcemanager.folders.create` (Organization Folder Admin)
+- `resourcemanager.projects.create` (Project Creator)
+- `billing.resourceAssociations.create` (Billing Account User)
+- `serviceusage.services.enable` (Service Usage Admin)
+- `billing.budgets.create` (Billing Budget Admin)
+- `iam.serviceAccounts.create` (Service Account Admin)
+
+## Usage
+
+```hcl
+module "gcp_project_hierarchy" {
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-google-project-hierarchy"
+
+  organization_id         = var.organization_id
+  default_billing_account = var.billing_account
+  notification_email      = "platform-alerts@example.com"
+
+  alert_thresholds = {
+    billing_amount = 50
+  }
+
+  hierarchy_config = jsondecode(file("${path.module}/hierarchy.json"))
+}
+```
+
+## Example Hierarchy JSON
+
+```json
+{
+  "folders": {
+    "shared": {
+      "display_name": "Shared",
+      "parent_type": "organization"
+    },
+    "platform": {
+      "display_name": "Platform",
+      "parent_type": "folder",
+      "parent_key": "shared"
+    }
+  },
+  "projects": {
+    "github-cicd": {
+      "name": "GitHub CICD",
+      "project_id": "prj-shared-github-cicd",
+      "folder_key": "platform",
+      "services": [
+        "iam.googleapis.com",
+        "cloudresourcemanager.googleapis.com",
+        "monitoring.googleapis.com"
+      ],
+      "labels": {
+        "env": "shared",
+        "team": "platform",
+        "managed-by": "terraform"
+      },
+      "enable_alerts": true
+    }
+  }
+}
+```
+
+## Input Variables
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|----------|
-| s3_config | Configuration object for S3 bucket | `object` | - | yes |
+|---|---|---|---|---|
+| `organization_id` | GCP organization ID | `string` | — | yes |
+| `region` | Default GCP region | `string` | `"us-central1"` | no |
+| `project_name` | Terraform project name | `string` | `"terraform-google-project-hierarchy"` | no |
+| `default_billing_account` | Default billing account ID | `string` | `null` | no |
+| `notification_email` | Email for alert notifications | `string` | `""` | no |
+| `alert_thresholds` | Monitoring alert thresholds | `object` | `{}` | no |
+| `hierarchy_config` | JSON-driven hierarchy configuration | `object` | — | yes |
 
-### s3_config Object Properties
+### `alert_thresholds` Object
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| bucket_name | string | - | Name of the S3 bucket (required) |
-| bucket_keys | list(string) | [] | List of folder prefixes to create |
-| versioning | bool | false | Enable versioning on the bucket |
-| sse_algorithm | string | null | Encryption algorithm: `AES256` (SSE-S3) or `aws:kms` (SSE-KMS) |
-| kms_key_alias | string | null | KMS key alias (required when sse_algorithm is `aws:kms`) |
-| bucket_policy | string | null | JSON bucket policy document |
+| Field | Description | Default |
+|---|---|---|
+| `billing_amount` | Billing budget amount in USD | `1` |
+| `threshold_rules` | List of threshold rules (see below) | 25%, 50%, 100% actual + 100% forecasted |
+
+Each `threshold_rules` entry:
+
+| Field | Description | Default |
+|---|---|---|
+| `threshold_percent` | Fraction of budget that triggers the alert (e.g. `0.5` = 50%) | required |
+| `spend_basis` | `"CURRENT_SPEND"` or `"FORECASTED_SPEND"` | `"CURRENT_SPEND"` |
+
+### `hierarchy_config` Object
+
+| Field | Description |
+|---|---|
+| `folders` | Map of folder key to folder definition |
+| `folders[].display_name` | Human-readable folder name |
+| `folders[].parent_type` | `"organization"` or `"folder"` |
+| `folders[].parent_key` | Key of the parent folder (when `parent_type = "folder"`) |
+| `projects` | Map of project key to project definition |
+| `projects[].name` | Project display name |
+| `projects[].project_id` | Globally unique GCP project ID |
+| `projects[].folder_key` | Key of the parent folder |
+| `projects[].billing_account` | Per-project billing account override |
+| `projects[].notification_email` | Per-project alert email (overrides `var.notification_email`) |
+| `projects[].alert_thresholds` | Per-project `billing_amount` and `threshold_rules` overrides (each falls back to `var.alert_thresholds`) |
+| `projects[].services` | List of GCP API URLs to enable |
+| `projects[].labels` | Key-value labels to apply |
+| `projects[].enable_alerts` | Create a billing budget alert for this project |
+| `projects[].service_account` | Object to configure a CI/CD service account (`enabled`, `account_id`, `display_name`, `project_roles`) |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
-| bucket_id | The name of the bucket |
-| bucket_arn | The ARN of the bucket |
-| bucket_domain_name | The bucket domain name |
-| versioning_enabled | Whether versioning is enabled |
-| bucket_keys | The bucket keys created in the bucket |
-| bucket_region | The AWS region where the bucket is located |
+|---|---|
+| `folder_ids` | Map of folder key to numeric GCP folder ID |
+| `folder_names` | Map of folder key to `folders/<id>` resource name |
+| `project_ids` | Map of project key to GCP project ID |
+| `project_numbers` | Map of project key to GCP project number |
+| `enabled_services` | Map of `project_key/service` to service name |
+| `billing_budget_ids` | Map of project key to billing budget resource name |
+| `notification_channel_ids` | Map of project key to email notification channel resource name |
+| `service_account_emails` | Map of project key to CI/CD service account email |
 
-## Event Notification Module
+## Notes
 
-### Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|----------|
-| enabled | Whether to create the S3 event notification | bool | true | no |
-| bucket_name | Name of the S3 bucket to configure notifications for | string | - | yes |
-| sqs_notifications | List of SQS queue notification configurations | list(object) | [] | no |
-| sns_notifications | List of SNS topic notification configurations | list(object) | [] | no |
-| lambda_notifications | List of Lambda function notification configurations | list(object) | [] | no |
-
-### SQS Notification Object Properties
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| id | string | - | Unique identifier for the notification |
-| queue_arn | string | - | ARN of the SQS queue |
-| events | list(string) | ["s3:ObjectCreated:*"] | S3 events to trigger notification |
-| filter_prefix | string | null | Object key prefix filter |
-| filter_suffix | string | null | Object key suffix filter |
-
-### SNS Notification Object Properties
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| id | string | - | Unique identifier for the notification |
-| topic_arn | string | - | ARN of the SNS topic |
-| events | list(string) | ["s3:ObjectCreated:*"] | S3 events to trigger notification |
-| filter_prefix | string | null | Object key prefix filter |
-| filter_suffix | string | null | Object key suffix filter |
-
-### Lambda Notification Object Properties
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| id | string | - | Unique identifier for the notification |
-| lambda_function_arn | string | - | ARN of the Lambda function |
-| events | list(string) | ["s3:ObjectCreated:*"] | S3 events to trigger notification |
-| filter_prefix | string | null | Object key prefix filter |
-| filter_suffix | string | null | Object key suffix filter |
-
-### Event Notification Outputs
-
-| Name | Description |
-|------|-------------|
-| notification_configured | Whether S3 event notifications were configured |
-| bucket_name | The S3 bucket name with notifications configured |
-| sqs_notification_count | Number of SQS notification configurations |
-| sns_notification_count | Number of SNS notification configurations |
-| lambda_notification_count | Number of Lambda notification configurations |
-
-## Resources Created
-
-### Bucket Module
-
-| Resource | Description |
-|----------|-------------|
-| aws_s3_bucket | The S3 bucket |
-| aws_s3_bucket_versioning | Versioning configuration |
-| aws_s3_bucket_public_access_block | Blocks all public access |
-| aws_s3_bucket_server_side_encryption_configuration | Encryption configuration (conditional) |
-| aws_s3_bucket_policy | Bucket policy (conditional) |
-| aws_s3_object | Folder placeholders (conditional) |
-
-### Event Notification Module
-
-| Resource | Description |
-|----------|-------------|
-| aws_s3_bucket_notification | S3 event notification configuration |
-
-## Validation
-
-The module validates inputs and provides descriptive error messages for:
-
-- Empty bucket name
-- Bucket name exceeding 63 characters
-- Invalid sse_algorithm value
-- Missing kms_key_alias when using SSE-KMS
-
-## Testing
-
-The module includes Terratest-based integration tests:
-
-```bash
-cd test
-go mod tidy
-go test -v -timeout 30m
-```
-
-### Test Cases
-
-| Test | Description |
-|------|-------------|
-| TestS3BucketBasic | Basic bucket creation |
-| TestS3BucketVersioning | Bucket with versioning |
-| TestS3BucketSSES3 | Bucket with SSE-S3 encryption |
-| TestS3BucketSSEKMS | Bucket with SSE-KMS encryption |
-| TestS3BucketWithFolders | Bucket with folder structure |
-
-AWS credentials must be configured via environment variables or AWS CLI profile.
-
-## CI/CD Configuration
-
-The CI workflow runs on:
-- Push to `main`, `feature/**`, and `bug/**` branches (when `modules/**` changes)
-- Pull requests to `main` (when `modules/**` changes)
-- Manual workflow dispatch
-
-The workflow includes:
-- Terraform validation and format checking
-- Examples validation
-- Terratest integration tests
-- Changelog generation (non-main branches)
-- Semantic release (main branch only)
-
-### GitHub Secrets
-
-| Secret | Description |
-|--------|-------------|
-| `AWS_ROLE_ARN` | IAM role ARN for OIDC authentication |
-
-### GitHub Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `TERRAFORM_VERSION` | Terraform version for CI jobs | `1.3.0` |
-| `GO_VERSION` | Go version for Terratest | `1.21` |
+- **Folder nesting**: Supports up to 3 levels of folder nesting under the organization. Level classification is based on `parent_type` and `parent_key` in the hierarchy_config.
+- **Billing**: Billing is managed via `google_project_billing_info`, decoupled from project creation. Set `default_billing_account` or per-project `billing_account` in the config.
+- **Service accounts**: Set `service_account.enabled = true` on a project to create a `google_service_account`. Use `account_id` and `display_name` to customise the SA identity, and `project_roles` to bind IAM roles on the project automatically. Falls back to `sa-<project-key>` / `SA-<project name>` if not specified.
+- **Billing budgets**: A `google_billing_budget` is created for each project that has `enable_alerts = true` and a billing account assigned. Threshold rules are fully configurable via `alert_thresholds.threshold_rules` in the JSON config, and fall back to module-level defaults (25%, 50%, 100% actual spend + 100% forecasted). GCP notifies billing account IAM members by default; supply `notification_email` to also alert a specific address.
+- **Service enablement**: APIs are enabled after billing association. `disable_on_destroy = false` prevents service disruption during Terraform destroy.
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) for details.
-
-## Breaking Changes
-
-### v2.0.0
-
-- **Module path changed**: The bucket module path changed from `modules/aws-s3-bucket` to `modules/bucket`. Update your source references accordingly.
-- **Output renamed**: `versioning_enabled` output renamed to `versioning_status`.
-- **Examples restructured**: Examples moved from `examples/<name>` to `examples/bucket/<name>` and `examples/event-notification/<name>`.
-- **New event-notification module**: Added separate module for S3 event notifications supporting SQS, SNS, and Lambda.
+Apache 2.0 — see [LICENSE](LICENSE).
