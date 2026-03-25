@@ -15,6 +15,8 @@
 - Implement billing budget alerts and service accounts for GCP projects
 - Add billing account to existing projects and create org_quotas.csv file
 - Update billing accounts in hierarchy.json files and adjust CI workflow paths
+- Enhance service account configuration and update documentation for clarity
+- Standardize formatting of hierarchy_config variable in variables.tf
 
 ### 🐛 Bug Fixes
 
@@ -36,6 +38,7 @@
 
 ### 📚 Documentation
 
+- Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
 - Update CHANGELOG.md [skip ci]
